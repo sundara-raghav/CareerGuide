@@ -53,7 +53,12 @@ class MarkFeatureEngineer(BaseEstimator, TransformerMixin):
     """Compute aggregate, marks tier (1–5), and per-subject z-score bucket."""
 
     def fit(self, X: pd.DataFrame, y=None):
-        mark_cols = [c for c in MARK_COLS_10 + MARK_COLS_12 if c in X.columns]
+        seen = set()
+        mark_cols = []
+        for c in MARK_COLS_10 + MARK_COLS_12:
+            if c in X.columns and c not in seen:
+                mark_cols.append(c)
+                seen.add(c)
         self.mark_cols_ = mark_cols
         return self
 
