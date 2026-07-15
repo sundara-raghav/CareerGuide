@@ -125,8 +125,8 @@ class AdmissionEvent(db.Model):
     college_id: Mapped[int] = mapped_column(ForeignKey("colleges.id"), nullable=False)
     course_name: Mapped[str] = mapped_column(String(200))
     status: Mapped[str] = mapped_column(
-        String(30), default="shortlisted"
-    )  # shortlisted/applied/admitted/rejected
+        db.Enum('shortlisted', 'applied', 'admitted', 'rejected', name='admission_status'), default='shortlisted'
+    )
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     admission_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     notes: Mapped[str | None] = mapped_column(Text)

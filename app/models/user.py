@@ -28,7 +28,7 @@ class User(UserMixin, db.Model):
     supabase_uid: Mapped[str] = mapped_column(String(64), unique=True, nullable=True, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.STUDENT, nullable=False)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.STUDENT, nullable=False)
     phone: Mapped[str | None] = mapped_column(String(20))
     preferred_language: Mapped[str] = mapped_column(String(10), default="en")
     password_hash: Mapped[str | None] = mapped_column(Text)

@@ -19,7 +19,7 @@ class Notification(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    channel: Mapped[str] = mapped_column(String(20))  # email/sms/whatsapp/inapp
+    channel: Mapped[str] = mapped_column(db.Enum('email', 'sms', 'whatsapp', 'inapp', name='notif_channel'), nullable=False)
     notification_type: Mapped[str] = mapped_column(String(50))  # deadline/recommendation/scholarship/reminder
 
     title: Mapped[str] = mapped_column(String(300), nullable=False)

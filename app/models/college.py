@@ -21,7 +21,7 @@ class College(db.Model):
     slug: Mapped[str] = mapped_column(String(300), unique=True, nullable=False, index=True)
 
     # Type
-    college_type: Mapped[str] = mapped_column(String(30), default="government")  # government/private/aided
+    college_type: Mapped[str] = mapped_column(db.Enum('government', 'private', 'aided', 'autonomous', name='college_type'), default="government")
     accreditation: Mapped[str | None] = mapped_column(String(50))  # NAAC A+/A/B etc.
 
     # Location
