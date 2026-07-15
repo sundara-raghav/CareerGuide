@@ -1,9 +1,8 @@
 """Recommendations blueprint — dashboard, feedback, career details."""
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
-from app.extensions import db
-from app.models.recommendation import ModelFeedback
 from app.repositories.recommendation_repo import RecommendationRepository
 from app.services.recommendation_service import RecommendationService
 

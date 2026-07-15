@@ -9,7 +9,7 @@ Generates ~1000+ realistic student profiles with labels covering:
 Run: python scripts/generate_dataset.py
 Output: data/synthetic_students.csv
 """
-import os
+
 import random
 from pathlib import Path
 
@@ -24,35 +24,101 @@ np.random.seed(42)
 STREAMS = ["Science", "Commerce", "Arts", "Vocational"]
 
 STREAM_COURSES: dict[str, list[str]] = {
-    "Science": ["BTech/BE", "BSc Physics", "BSc Chemistry", "BSc Biology", "BSc Math",
-                "MBBS/BDS", "Pharmacy (BPharm)", "Nursing (BSc)", "BCA", "BSc Agriculture"],
-    "Commerce": ["BCom", "BBA", "CA Foundation", "BBA Finance", "BBA Marketing",
-                 "BCom Computer Apps", "Hotel Management", "BMS"],
-    "Arts": ["BA English", "BA History", "BA Psychology", "BA Political Science",
-             "BA Social Work", "BFA", "BJournalism", "BA Economics"],
-    "Vocational": ["Diploma Engineering", "ITI Electrician", "ITI Fitter",
-                   "ITI Mechanic", "Polytechnic", "Animation Diploma",
-                   "Fashion Design Diploma", "Paramedical Diploma"],
+    "Science": [
+        "BTech/BE",
+        "BSc Physics",
+        "BSc Chemistry",
+        "BSc Biology",
+        "BSc Math",
+        "MBBS/BDS",
+        "Pharmacy (BPharm)",
+        "Nursing (BSc)",
+        "BCA",
+        "BSc Agriculture",
+    ],
+    "Commerce": [
+        "BCom",
+        "BBA",
+        "CA Foundation",
+        "BBA Finance",
+        "BBA Marketing",
+        "BCom Computer Apps",
+        "Hotel Management",
+        "BMS",
+    ],
+    "Arts": [
+        "BA English",
+        "BA History",
+        "BA Psychology",
+        "BA Political Science",
+        "BA Social Work",
+        "BFA",
+        "BJournalism",
+        "BA Economics",
+    ],
+    "Vocational": [
+        "Diploma Engineering",
+        "ITI Electrician",
+        "ITI Fitter",
+        "ITI Mechanic",
+        "Polytechnic",
+        "Animation Diploma",
+        "Fashion Design Diploma",
+        "Paramedical Diploma",
+    ],
 }
 
 CAREER_CLUSTERS = [
-    "Engineering & Technology", "Healthcare & Medicine",
-    "Business & Finance", "Education & Social Work",
-    "Arts & Media", "Government & Civil Services",
-    "Agriculture & Environment", "Trades & Skilled Work",
-    "Law & Public Policy", "Science & Research",
+    "Engineering & Technology",
+    "Healthcare & Medicine",
+    "Business & Finance",
+    "Education & Social Work",
+    "Arts & Media",
+    "Government & Civil Services",
+    "Agriculture & Environment",
+    "Trades & Skilled Work",
+    "Law & Public Policy",
+    "Science & Research",
 ]
 
 BOARDS = ["CBSE", "State Board", "ICSE", "Matriculation"]
 DISTRICTS = [
-    "Chennai", "Coimbatore", "Madurai", "Trichy", "Salem", "Tirunelveli",
-    "Erode", "Vellore", "Thanjavur", "Kanchipuram", "Villupuram", "Dharmapuri",
-    "Namakkal", "Karur", "Dindigul", "Ariyalur", "Perambalur", "Cuddalore",
+    "Chennai",
+    "Coimbatore",
+    "Madurai",
+    "Trichy",
+    "Salem",
+    "Tirunelveli",
+    "Erode",
+    "Vellore",
+    "Thanjavur",
+    "Kanchipuram",
+    "Villupuram",
+    "Dharmapuri",
+    "Namakkal",
+    "Karur",
+    "Dindigul",
+    "Ariyalur",
+    "Perambalur",
+    "Cuddalore",
 ]
 INTERESTS_POOL = [
-    "mathematics", "biology", "computers", "sports", "arts", "music",
-    "social_service", "business", "nature", "writing", "politics", "cooking",
-    "electronics", "farming", "healthcare", "teaching",
+    "mathematics",
+    "biology",
+    "computers",
+    "sports",
+    "arts",
+    "music",
+    "social_service",
+    "business",
+    "nature",
+    "writing",
+    "politics",
+    "cooking",
+    "electronics",
+    "farming",
+    "healthcare",
+    "teaching",
 ]
 SCHOOL_TYPES = ["government", "private", "aided"]
 
@@ -89,7 +155,10 @@ def _aptitude_profile(stream: str) -> dict:
         "Vocational": dict(logical=60, verbal=55, quantitative=58, social=60, creative=65, technical=75),
     }
     base = profiles[stream]
-    noise = lambda v: round(max(0, min(100, v + random.gauss(0, 10))), 1)
+
+    def noise(v):
+        return round(max(0, min(100, v + random.gauss(0, 10))), 1)
+
     return {k: noise(v) for k, v in base.items()}
 
 
@@ -99,24 +168,40 @@ def _label_course(stream: str) -> str:
 
 def _label_career(stream: str, course: str) -> str:
     mapping = {
-        "BTech/BE": "Engineering & Technology", "BCA": "Engineering & Technology",
-        "BSc Physics": "Science & Research", "BSc Chemistry": "Science & Research",
-        "BSc Math": "Science & Research", "BSc Biology": "Healthcare & Medicine",
-        "MBBS/BDS": "Healthcare & Medicine", "Nursing (BSc)": "Healthcare & Medicine",
+        "BTech/BE": "Engineering & Technology",
+        "BCA": "Engineering & Technology",
+        "BSc Physics": "Science & Research",
+        "BSc Chemistry": "Science & Research",
+        "BSc Math": "Science & Research",
+        "BSc Biology": "Healthcare & Medicine",
+        "MBBS/BDS": "Healthcare & Medicine",
+        "Nursing (BSc)": "Healthcare & Medicine",
         "Pharmacy (BPharm)": "Healthcare & Medicine",
         "BSc Agriculture": "Agriculture & Environment",
-        "BCom": "Business & Finance", "BBA": "Business & Finance",
-        "CA Foundation": "Business & Finance", "BBA Finance": "Business & Finance",
-        "BBA Marketing": "Business & Finance", "BCom Computer Apps": "Engineering & Technology",
-        "Hotel Management": "Business & Finance", "BMS": "Business & Finance",
-        "BA English": "Arts & Media", "BA History": "Education & Social Work",
-        "BA Psychology": "Education & Social Work", "BA Political Science": "Government & Civil Services",
-        "BA Social Work": "Education & Social Work", "BFA": "Arts & Media",
-        "BJournalism": "Arts & Media", "BA Economics": "Business & Finance",
-        "Diploma Engineering": "Trades & Skilled Work", "ITI Electrician": "Trades & Skilled Work",
-        "ITI Fitter": "Trades & Skilled Work", "ITI Mechanic": "Trades & Skilled Work",
-        "Polytechnic": "Trades & Skilled Work", "Animation Diploma": "Arts & Media",
-        "Fashion Design Diploma": "Arts & Media", "Paramedical Diploma": "Healthcare & Medicine",
+        "BCom": "Business & Finance",
+        "BBA": "Business & Finance",
+        "CA Foundation": "Business & Finance",
+        "BBA Finance": "Business & Finance",
+        "BBA Marketing": "Business & Finance",
+        "BCom Computer Apps": "Engineering & Technology",
+        "Hotel Management": "Business & Finance",
+        "BMS": "Business & Finance",
+        "BA English": "Arts & Media",
+        "BA History": "Education & Social Work",
+        "BA Psychology": "Education & Social Work",
+        "BA Political Science": "Government & Civil Services",
+        "BA Social Work": "Education & Social Work",
+        "BFA": "Arts & Media",
+        "BJournalism": "Arts & Media",
+        "BA Economics": "Business & Finance",
+        "Diploma Engineering": "Trades & Skilled Work",
+        "ITI Electrician": "Trades & Skilled Work",
+        "ITI Fitter": "Trades & Skilled Work",
+        "ITI Mechanic": "Trades & Skilled Work",
+        "Polytechnic": "Trades & Skilled Work",
+        "Animation Diploma": "Arts & Media",
+        "Fashion Design Diploma": "Arts & Media",
+        "Paramedical Diploma": "Healthcare & Medicine",
     }
     return mapping.get(course, "Government & Civil Services")
 

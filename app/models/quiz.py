@@ -1,7 +1,8 @@
 """Quiz and aptitude score models."""
-from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text
+from datetime import UTC, datetime
+
+from sqlalchemy import DateTime, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import JSON
 
@@ -19,9 +20,7 @@ class QuizAttempt(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("students.id"), nullable=False)
     responses: Mapped[list] = mapped_column(JSON, default=list)
-    started_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     time_taken_seconds: Mapped[int | None] = mapped_column(Integer)
     is_complete: Mapped[bool] = mapped_column(default=False)
@@ -58,9 +57,7 @@ class AptitudeScore(db.Model):
     # Composite score
     composite: Mapped[float] = mapped_column(Float, default=0.0)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     student: Mapped["Student"] = relationship("Student", back_populates="aptitude_score")  # noqa: F821
     quiz_attempt: Mapped["QuizAttempt"] = relationship("QuizAttempt", back_populates="aptitude_score")

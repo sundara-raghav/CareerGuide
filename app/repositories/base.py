@@ -1,4 +1,5 @@
 """Generic base repository providing common CRUD operations."""
+
 from typing import Any, Generic, TypeVar
 
 from sqlalchemy import select
@@ -52,6 +53,7 @@ class BaseRepository(Generic[T]):
 
     def count(self) -> int:
         from sqlalchemy import func
+
         return self.session.scalar(select(func.count()).select_from(self.model_class)) or 0
 
     def commit(self) -> None:

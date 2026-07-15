@@ -4,8 +4,8 @@ i18n utilities — simple JSON-based translation system.
 Translations stored in: app/static/locales/{lang}.json
 Falls back to English if key missing in target language.
 """
+
 import json
-import os
 from functools import lru_cache
 from pathlib import Path
 

@@ -1,11 +1,12 @@
 """Admin blueprint — analytics dashboard, counselor tools."""
+
 from flask import Blueprint, jsonify, render_template, request
 from flask_login import current_user, login_required
 
 from app.extensions import db
 from app.models.recommendation import CounselorFeedback
 from app.models.student import Student
-from app.models.user import User, UserRole
+from app.models.user import UserRole
 from app.repositories.recommendation_repo import RecommendationRepository
 from app.repositories.student_repo import StudentRepository
 from app.utils.decorators import role_required
@@ -72,6 +73,7 @@ def _get_platform_stats() -> dict:
     onboarded = db.session.query(Student).filter_by(onboarding_complete=True).count()
     quiz_done = db.session.query(Student).filter_by(quiz_complete=True).count()
     from app.models.recommendation import Recommendation
+
     total_recs = db.session.query(Recommendation).count()
 
     return {

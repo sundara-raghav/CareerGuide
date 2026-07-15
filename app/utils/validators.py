@@ -1,6 +1,6 @@
 """Input validation utilities."""
-import re
 
+import re
 
 EMAIL_RE = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 PHONE_RE = re.compile(r"^\+?[0-9]{10,15}$")
@@ -22,6 +22,7 @@ def validate_phone(phone: str) -> bool:
 def sanitize_string(value: str, max_length: int = 255) -> str:
     """Strip whitespace and truncate."""
     import bleach
+
     return bleach.clean(value.strip())[:max_length]
 
 

@@ -1,4 +1,7 @@
 """Auth blueprint — registration, login, logout, profile."""
+
+from datetime import UTC
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -75,8 +78,9 @@ def login():
             return render_template("auth/login.html", email=email)
 
         login_user(user, remember=remember)
-        from datetime import datetime, timezone
-        user.last_login = datetime.now(timezone.utc)
+        from datetime import datetime
+
+        user.last_login = datetime.now(UTC)
         db.session.commit()
 
         next_page = request.args.get("next")

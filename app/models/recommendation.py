@@ -1,5 +1,6 @@
 """Recommendation and model feedback models."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,9 +44,7 @@ class Recommendation(db.Model):
     shortlisted_courses: Mapped[list] = mapped_column(JSON, default=list)
     rejected_courses: Mapped[list] = mapped_column(JSON, default=list)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     student: Mapped["Student"] = relationship("Student", back_populates="recommendations")  # noqa: F821
     feedback: Mapped[list["ModelFeedback"]] = relationship(
@@ -88,13 +87,11 @@ class ModelFeedback(db.Model):
     outcome_satisfied: Mapped[bool | None] = mapped_column()
     outcome_notes: Mapped[str | None] = mapped_column(Text)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     recommendation: Mapped["Recommendation"] = relationship("Recommendation", back_populates="feedback")
@@ -111,6 +108,4 @@ class CounselorFeedback(db.Model):
     recommendation_id: Mapped[int | None] = mapped_column(ForeignKey("recommendations.id"))
     notes: Mapped[str] = mapped_column(Text, nullable=False)
     override_stream: Mapped[str | None] = mapped_column(String(50))
-    reviewed_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    reviewed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))

@@ -1,4 +1,5 @@
 """Recommendation repository."""
+
 from sqlalchemy import desc, select
 
 from app.models.recommendation import ModelFeedback, Recommendation
@@ -28,17 +29,22 @@ class RecommendationRepository(BaseRepository[Recommendation]):
     def get_acceptance_rate(self) -> float:
         """Returns the fraction of recommendations that were accepted."""
         from sqlalchemy import func
-        total = self.session.scalar(select(func.count()).select_from(ModelFeedback).where(ModelFeedback.accepted.isnot(None)))
-        accepted = self.session.scalar(select(func.count()).select_from(ModelFeedback).where(ModelFeedback.accepted.is_(True)))
+
+        total = self.session.scalar(
+            select(func.count()).select_from(ModelFeedback).where(ModelFeedback.accepted.isnot(None))
+        )
+        accepted = self.session.scalar(
+            select(func.count()).select_from(ModelFeedback).where(ModelFeedback.accepted.is_(True))
+        )
         if not total:
             return 0.0
         return round((accepted or 0) / total, 4)
 
     def get_stream_distribution(self) -> list[dict]:
         from sqlalchemy import func
-        stmt = (
-            select(Recommendation.recommended_stream, func.count().label("count"))
-            .group_by(Recommendation.recommended_stream)
+
+        stmt = select(Recommendation.recommended_stream, func.count().label("count")).group_by(
+            Recommendation.recommended_stream
         )
         rows = self.session.execute(stmt).all()
         return [{"stream": r.recommended_stream, "count": r.count} for r in rows]

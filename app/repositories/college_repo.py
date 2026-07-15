@@ -1,7 +1,8 @@
 """College repository with geospatial queries."""
+
 import math
 
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, or_, select
 
 from app.models.college import College
 from app.repositories.base import BaseRepository
@@ -33,9 +34,7 @@ class CollegeRepository(BaseRepository[College]):
         if has_hostel is not None:
             stmt = stmt.where(College.has_hostel == has_hostel)
         if max_fees:
-            stmt = stmt.where(
-                or_(College.annual_fees_min <= max_fees, College.annual_fees_min.is_(None))
-            )
+            stmt = stmt.where(or_(College.annual_fees_min <= max_fees, College.annual_fees_min.is_(None)))
         return list(self.session.scalars(stmt.limit(limit)))
 
     def get_nearby(

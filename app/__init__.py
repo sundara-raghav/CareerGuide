@@ -4,6 +4,7 @@ Application factory — creates and configures the Flask app.
 Using the factory pattern allows multiple app instances (testing, production)
 and avoids circular imports through deferred extension initialization.
 """
+
 import logging
 import os
 
@@ -59,9 +60,7 @@ def _configure_logging(app: Flask) -> None:
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
-    logging.basicConfig(
-        level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO
-    )
+    logging.basicConfig(level=logging.DEBUG if app.config.get("DEBUG") else logging.INFO)
 
 
 def _init_extensions(app: Flask) -> None:

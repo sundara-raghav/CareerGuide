@@ -1,4 +1,5 @@
 """Repositories package."""
+
 from app.repositories.base import BaseRepository
 from app.repositories.college_repo import CollegeRepository
 from app.repositories.recommendation_repo import RecommendationRepository

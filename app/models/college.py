@@ -1,8 +1,9 @@
 """College and course models."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, Integer, String, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import JSON
 
 from app.extensions import db
@@ -21,7 +22,9 @@ class College(db.Model):
     slug: Mapped[str] = mapped_column(String(300), unique=True, nullable=False, index=True)
 
     # Type
-    college_type: Mapped[str] = mapped_column(db.Enum('government', 'private', 'aided', 'autonomous', name='college_type'), default="government")
+    college_type: Mapped[str] = mapped_column(
+        db.Enum("government", "private", "aided", "autonomous", name="college_type"), default="government"
+    )
     accreditation: Mapped[str | None] = mapped_column(String(50))  # NAAC A+/A/B etc.
 
     # Location
@@ -57,13 +60,11 @@ class College(db.Model):
     image_url: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     def __repr__(self) -> str:
@@ -115,9 +116,7 @@ class Scholarship(db.Model):
     description: Mapped[str | None] = mapped_column(Text)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     def to_dict(self) -> dict:
         return {

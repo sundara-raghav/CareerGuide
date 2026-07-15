@@ -8,26 +8,42 @@ Handles:
 - Income normalization
 - Interest multi-hot encoding
 """
+
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
-
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 APTITUDE_COLS = [
-    "apt_logical", "apt_verbal", "apt_quantitative",
-    "apt_social", "apt_creative", "apt_technical",
+    "apt_logical",
+    "apt_verbal",
+    "apt_quantitative",
+    "apt_social",
+    "apt_creative",
+    "apt_technical",
 ]
 
 MARK_COLS_10 = ["mark_math", "mark_science", "mark_social", "mark_english", "mark_regional_language"]
 MARK_COLS_12 = ["mark_english", "mark_core_subject_1", "mark_core_subject_2", "mark_elective_1", "mark_elective_2"]
 
 INTEREST_COLS = [
-    "interest_mathematics", "interest_biology", "interest_computers", "interest_sports",
-    "interest_arts", "interest_music", "interest_social_service", "interest_business",
-    "interest_nature", "interest_writing", "interest_politics", "interest_cooking",
-    "interest_electronics", "interest_farming", "interest_healthcare", "interest_teaching",
+    "interest_mathematics",
+    "interest_biology",
+    "interest_computers",
+    "interest_sports",
+    "interest_arts",
+    "interest_music",
+    "interest_social_service",
+    "interest_business",
+    "interest_nature",
+    "interest_writing",
+    "interest_politics",
+    "interest_cooking",
+    "interest_electronics",
+    "interest_farming",
+    "interest_healthcare",
+    "interest_teaching",
 ]
 
 CATEGORICAL_COLS = ["board", "school_type", "caste_category", "gender"]
@@ -66,10 +82,16 @@ class AptitudeEngineer(BaseEstimator, TransformerMixin):
         apt_present = [c for c in APTITUDE_COLS if c in X.columns]
         if apt_present:
             X["_apt_composite"] = X[apt_present].mean(axis=1)
-            X["_apt_stem"] = X[["apt_logical", "apt_quantitative", "apt_technical"]].mean(axis=1) \
-                if all(c in X.columns for c in ["apt_logical", "apt_quantitative", "apt_technical"]) else 0
-            X["_apt_humanities"] = X[["apt_verbal", "apt_social", "apt_creative"]].mean(axis=1) \
-                if all(c in X.columns for c in ["apt_verbal", "apt_social", "apt_creative"]) else 0
+            X["_apt_stem"] = (
+                X[["apt_logical", "apt_quantitative", "apt_technical"]].mean(axis=1)
+                if all(c in X.columns for c in ["apt_logical", "apt_quantitative", "apt_technical"])
+                else 0
+            )
+            X["_apt_humanities"] = (
+                X[["apt_verbal", "apt_social", "apt_creative"]].mean(axis=1)
+                if all(c in X.columns for c in ["apt_verbal", "apt_social", "apt_creative"])
+                else 0
+            )
             X["_apt_domain_flag"] = (X["_apt_stem"] > X["_apt_humanities"]).astype(int)
         return X
 
@@ -130,11 +152,13 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
 
 def build_preprocessing_pipeline() -> Pipeline:
     """Returns a sklearn Pipeline that transforms raw student DataFrames."""
-    return Pipeline([
-        ("mark_eng", MarkFeatureEngineer()),
-        ("apt_eng", AptitudeEngineer()),
-        ("income_norm", IncomeNormalizer()),
-        ("cat_enc", CategoricalEncoder()),
-        ("col_select", ColumnSelector()),
-        ("scaler", StandardScaler()),
-    ])
+    return Pipeline(
+        [
+            ("mark_eng", MarkFeatureEngineer()),
+            ("apt_eng", AptitudeEngineer()),
+            ("income_norm", IncomeNormalizer()),
+            ("cat_enc", CategoricalEncoder()),
+            ("col_select", ColumnSelector()),
+            ("scaler", StandardScaler()),
+        ]
+    )

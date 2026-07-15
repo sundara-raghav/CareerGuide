@@ -1,5 +1,6 @@
 """Notification model."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -19,7 +20,9 @@ class Notification(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
-    channel: Mapped[str] = mapped_column(db.Enum('email', 'sms', 'whatsapp', 'inapp', name='notif_channel'), nullable=False)
+    channel: Mapped[str] = mapped_column(
+        db.Enum("email", "sms", "whatsapp", "inapp", name="notif_channel"), nullable=False
+    )
     notification_type: Mapped[str] = mapped_column(String(50))  # deadline/recommendation/scholarship/reminder
 
     title: Mapped[str] = mapped_column(String(300), nullable=False)
@@ -31,9 +34,7 @@ class Notification(db.Model):
     status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/sent/failed
     error_message: Mapped[str | None] = mapped_column(String(500))
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     user: Mapped["User"] = relationship("User", back_populates="notifications")  # noqa: F821
 

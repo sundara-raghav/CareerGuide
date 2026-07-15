@@ -1,7 +1,7 @@
 """Unit tests for the ML pipeline and inference service."""
+
 import numpy as np
 import pandas as pd
-import pytest
 
 from app.ml.pipeline import (
     AptitudeEngineer,
@@ -14,10 +14,17 @@ from app.ml.pipeline import (
 
 class TestMarkFeatureEngineer:
     def test_aggregate_computed(self):
-        df = pd.DataFrame([{
-            "mark_math": 80.0, "mark_science": 70.0, "mark_social": 60.0,
-            "mark_english": 75.0, "mark_regional_language": 65.0,
-        }])
+        df = pd.DataFrame(
+            [
+                {
+                    "mark_math": 80.0,
+                    "mark_science": 70.0,
+                    "mark_social": 60.0,
+                    "mark_english": 75.0,
+                    "mark_regional_language": 65.0,
+                }
+            ]
+        )
         eng = MarkFeatureEngineer().fit(df)
         result = eng.transform(df)
         assert "_aggregate" in result.columns
@@ -33,20 +40,36 @@ class TestMarkFeatureEngineer:
 
 class TestAptitudeEngineer:
     def test_composite_score(self):
-        df = pd.DataFrame([{
-            "apt_logical": 80, "apt_verbal": 70, "apt_quantitative": 90,
-            "apt_social": 60, "apt_creative": 75, "apt_technical": 85,
-        }])
+        df = pd.DataFrame(
+            [
+                {
+                    "apt_logical": 80,
+                    "apt_verbal": 70,
+                    "apt_quantitative": 90,
+                    "apt_social": 60,
+                    "apt_creative": 75,
+                    "apt_technical": 85,
+                }
+            ]
+        )
         eng = AptitudeEngineer().fit(df)
         result = eng.transform(df)
         expected = np.mean([80, 70, 90, 60, 75, 85])
         assert abs(result["_apt_composite"].iloc[0] - expected) < 0.01
 
     def test_stem_vs_humanities(self):
-        df = pd.DataFrame([{
-            "apt_logical": 90, "apt_verbal": 40, "apt_quantitative": 85,
-            "apt_social": 40, "apt_creative": 45, "apt_technical": 90,
-        }])
+        df = pd.DataFrame(
+            [
+                {
+                    "apt_logical": 90,
+                    "apt_verbal": 40,
+                    "apt_quantitative": 85,
+                    "apt_social": 40,
+                    "apt_creative": 45,
+                    "apt_technical": 90,
+                }
+            ]
+        )
         eng = AptitudeEngineer().fit(df)
         result = eng.transform(df)
         assert result["_apt_domain_flag"].iloc[0] == 1  # STEM dominant
@@ -79,6 +102,7 @@ class TestIncomNormalizer:
 class TestPreprocessingPipeline:
     def test_pipeline_runs_end_to_end(self):
         from scripts.generate_dataset import generate_dataset
+
         df = generate_dataset(50)
         pipeline = build_preprocessing_pipeline()
         X_raw = df.drop(columns=["target_stream", "target_course", "target_career_cluster"], errors="ignore")

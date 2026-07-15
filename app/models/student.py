@@ -1,5 +1,6 @@
 """Student and Parent profile models."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 
 from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -52,13 +53,11 @@ class Student(db.Model):
     quiz_complete: Mapped[bool] = mapped_column(Boolean, default=False)
     profile_score: Mapped[float] = mapped_column(Float, default=0.0)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     # Relationships
@@ -107,9 +106,7 @@ class Parent(db.Model):
     annual_income: Mapped[float | None] = mapped_column(Float)
     education_level: Mapped[str | None] = mapped_column(String(100))
     preferred_language: Mapped[str] = mapped_column(String(10), default="en")
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     user: Mapped["User"] = relationship("User", back_populates="parent_profile")  # noqa: F821
     linked_student: Mapped["Student | None"] = relationship("Student", foreign_keys=[linked_student_id])
@@ -125,14 +122,12 @@ class AdmissionEvent(db.Model):
     college_id: Mapped[int] = mapped_column(ForeignKey("colleges.id"), nullable=False)
     course_name: Mapped[str] = mapped_column(String(200))
     status: Mapped[str] = mapped_column(
-        db.Enum('shortlisted', 'applied', 'admitted', 'rejected', name='admission_status'), default='shortlisted'
+        db.Enum("shortlisted", "applied", "admitted", "rejected", name="admission_status"), default="shortlisted"
     )
     applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     admission_confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     notes: Mapped[str | None] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     student: Mapped["Student"] = relationship("Student", back_populates="admission_events")
     college: Mapped["College"] = relationship("College")  # noqa: F821

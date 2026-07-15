@@ -1,8 +1,9 @@
 """Notification service — multi-channel event-driven notifications."""
+
 from __future__ import annotations
 
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import structlog
 
@@ -55,7 +56,7 @@ class NotificationService:
                 # inapp: stored in DB, polled by frontend
 
                 notif.status = "sent"
-                notif.sent_at = datetime.now(timezone.utc)
+                notif.sent_at = datetime.now(UTC)
 
             except Exception as exc:
                 log.error("Notification send failed", channel=channel, error=str(exc))
@@ -74,7 +75,7 @@ class NotificationService:
             return
 
         import sendgrid
-        from sendgrid.helpers.mail import Content, Mail, To
+        from sendgrid.helpers.mail import Content, Mail
 
         sg = sendgrid.SendGridAPIClient(api_key=api_key)
         mail = Mail(
@@ -97,6 +98,7 @@ class NotificationService:
             return
 
         from twilio.rest import Client
+
         client = Client(account_sid, auth_token)
         client.messages.create(
             body=body,
@@ -114,6 +116,7 @@ class NotificationService:
             return
 
         from twilio.rest import Client
+
         client = Client(account_sid, auth_token)
         client.messages.create(
             body=body,
@@ -144,8 +147,11 @@ try:
     from celery import shared_task
 
     @shared_task(bind=True, max_retries=3, default_retry_delay=60)
-    def send_notification_task(self, user_id: int, notification_type: str, title: str, body: str, channels: list[str], payload: dict):
+    def send_notification_task(
+        self, user_id: int, notification_type: str, title: str, body: str, channels: list[str], payload: dict
+    ):
         from app.models.user import User
+
         user = db.session.get(User, user_id)
         if user:
             NotificationService().send(user, notification_type, title, body, channels, payload)

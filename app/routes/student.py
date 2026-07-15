@@ -1,12 +1,12 @@
 """Student blueprint — onboarding wizard, quiz, dashboard."""
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
+
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.extensions import db
 from app.models.student import Student
 from app.services.quiz_service import QuizService
 from app.services.recommendation_service import RecommendationService
-from app.utils.decorators import role_required
 
 student_bp = Blueprint("student", __name__, template_folder="../templates/student")
 quiz_svc = QuizService()
@@ -91,7 +91,7 @@ def quiz_submit():
                 pass
 
     try:
-        aptitude = quiz_svc.submit_attempt(attempt_id, responses)
+        quiz_svc.submit_attempt(attempt_id, responses)
         rec = rec_svc.generate_for_student(student)
         if rec:
             flash("Your personalized recommendations are ready!", "success")
@@ -108,6 +108,7 @@ def dashboard():
     latest_rec = None
     if student and student.quiz_complete:
         from app.repositories.recommendation_repo import RecommendationRepository
+
         latest_rec = RecommendationRepository().get_latest_for_student(student.id)
 
     return render_template(
@@ -126,7 +127,6 @@ def _save_onboarding_step(student: Student, step: int, form) -> None:
         student.school_name = form.get("school_name", "")
         student.school_type = form.get("school_type", "government")
     elif step == 2:
-        import json
         marks_raw = {k[5:]: float(v) for k, v in form.items() if k.startswith("mark_") and v}
         student.marks = marks_raw
         if marks_raw:
@@ -137,7 +137,7 @@ def _save_onboarding_step(student: Student, step: int, form) -> None:
         student.state = form.get("state", "Tamil Nadu")
         student.pincode = form.get("pincode", "")
         student.travel_radius_km = form.get("travel_radius_km", type=float, default=50.0)
-        
+
         # Geocode the district to latitude and longitude
         coords = DISTRICT_COORDS.get(district.lower())
         if coords:

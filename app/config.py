@@ -4,6 +4,7 @@ Application configuration classes for different environments.
 Pattern: Environment-specific classes inherit from BaseConfig.
 Selected via FLASK_ENV environment variable.
 """
+
 import os
 from datetime import timedelta
 
@@ -68,9 +69,7 @@ class BaseConfig:
 
     # i18n
     DEFAULT_LANGUAGE: str = os.getenv("DEFAULT_LANGUAGE", "en")
-    SUPPORTED_LANGUAGES: list[str] = os.getenv(
-        "SUPPORTED_LANGUAGES", "en,ta,hi"
-    ).split(",")
+    SUPPORTED_LANGUAGES: list[str] = os.getenv("SUPPORTED_LANGUAGES", "en,ta,hi").split(",")
 
     # WTF CSRF
     WTF_CSRF_ENABLED = True
@@ -82,9 +81,7 @@ class DevelopmentConfig(BaseConfig):
 
     DEBUG = True
     TESTING = False
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL", "sqlite:///careerguide_dev.db"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///careerguide_dev.db")
     WTF_CSRF_ENABLED = False  # Easier API testing locally
     SESSION_COOKIE_SECURE = False
 
@@ -119,9 +116,7 @@ class ProductionConfig(BaseConfig):
         ]
         missing = [k for k in required if not os.getenv(k)]
         if missing:
-            raise EnvironmentError(
-                f"Missing required environment variables: {', '.join(missing)}"
-            )
+            raise OSError(f"Missing required environment variables: {', '.join(missing)}")
 
 
 CONFIG_MAP = {

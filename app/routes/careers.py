@@ -1,5 +1,6 @@
 """Remaining blueprints: careers, notifications, analytics."""
-from flask import Blueprint, jsonify, render_template, request
+
+from flask import Blueprint, jsonify, render_template
 from flask_login import current_user, login_required
 
 from app.services.notification_service import NotificationService
@@ -51,18 +52,22 @@ analytics_bp = Blueprint("analytics", __name__)
 def impact():
     """Public impact metrics for the landing page counter."""
     from app.extensions import db
-    from app.models.student import Student
     from app.models.recommendation import Recommendation
-    return jsonify({
-        "students_guided": db.session.query(Student).count(),
-        "recommendations_made": db.session.query(Recommendation).count(),
-        "colleges_listed": db.session.query(__import__("app.models.college", fromlist=["College"]).College).count(),
-    })
+    from app.models.student import Student
+
+    return jsonify(
+        {
+            "students_guided": db.session.query(Student).count(),
+            "recommendations_made": db.session.query(Recommendation).count(),
+            "colleges_listed": db.session.query(__import__("app.models.college", fromlist=["College"]).College).count(),
+        }
+    )
 
 
 @analytics_bp.route("/api/district-heatmap")
 @login_required
 def district_heatmap():
     from app.repositories.student_repo import StudentRepository
+
     data = StudentRepository().count_by_district()
     return jsonify(data)

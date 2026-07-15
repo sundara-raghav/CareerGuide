@@ -11,24 +11,19 @@ Three tasks:
   2. course_clf  — predicts top course category
   3. career_clf  — predicts career cluster
 """
+
 from __future__ import annotations
 
 import numpy as np
-import pandas as pd
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier, StackingClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import (
-    accuracy_score,
-    classification_report,
-    f1_score,
-    precision_score,
-    recall_score,
-)
+from sklearn.metrics import accuracy_score, classification_report, f1_score, precision_score, recall_score
 from sklearn.preprocessing import LabelEncoder
 
 try:
     from xgboost import XGBClassifier
+
     XGB_AVAILABLE = True
 except ImportError:
     XGB_AVAILABLE = False
@@ -36,32 +31,43 @@ except ImportError:
 
 def _make_base_estimators(n_classes: int) -> list:
     estimators = [
-        ("rf", RandomForestClassifier(
-            n_estimators=200,
-            max_depth=12,
-            min_samples_split=5,
-            class_weight="balanced",
-            random_state=42,
-            n_jobs=-1,
-        )),
-        ("lr", LogisticRegression(
-            max_iter=1000,
-            class_weight="balanced",
-            random_state=42,
-            C=1.0,
-        )),
+        (
+            "rf",
+            RandomForestClassifier(
+                n_estimators=200,
+                max_depth=12,
+                min_samples_split=5,
+                class_weight="balanced",
+                random_state=42,
+                n_jobs=-1,
+            ),
+        ),
+        (
+            "lr",
+            LogisticRegression(
+                max_iter=1000,
+                class_weight="balanced",
+                random_state=42,
+                C=1.0,
+            ),
+        ),
     ]
     if XGB_AVAILABLE:
-        estimators.append(("xgb", XGBClassifier(
-            n_estimators=150,
-            max_depth=6,
-            learning_rate=0.1,
-            subsample=0.8,
-            colsample_bytree=0.8,
-            use_label_encoder=False,
-            eval_metric="mlogloss",
-            random_state=42,
-        )))
+        estimators.append(
+            (
+                "xgb",
+                XGBClassifier(
+                    n_estimators=150,
+                    max_depth=6,
+                    learning_rate=0.1,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    use_label_encoder=False,
+                    eval_metric="mlogloss",
+                    random_state=42,
+                ),
+            )
+        )
     return estimators
 
 
@@ -83,7 +89,7 @@ class EnsembleClassifier:
         self.feature_names_: list[str] = []
         self.is_fitted = False
 
-    def fit(self, X: np.ndarray, y_raw: np.ndarray, feature_names: list[str] | None = None) -> "EnsembleClassifier":
+    def fit(self, X: np.ndarray, y_raw: np.ndarray, feature_names: list[str] | None = None) -> EnsembleClassifier:
         y = self.label_encoder.fit_transform(y_raw)
         self.classes_ = list(self.label_encoder.classes_)
         n_classes = len(self.classes_)
@@ -105,6 +111,7 @@ class EnsembleClassifier:
         # Calibrate on the same data (in production: use held-out calibration set)
         try:
             from sklearn.frozen import FrozenEstimator
+
             self._calibrated = CalibratedClassifierCV(estimator=FrozenEstimator(self._clf), cv=None, method="sigmoid")
         except ImportError:
             try:
@@ -171,7 +178,7 @@ class CareerRecommendationEnsemble:
         X_career: np.ndarray,
         y_career: np.ndarray,
         feature_names: list[str] | None = None,
-    ) -> "CareerRecommendationEnsemble":
+    ) -> CareerRecommendationEnsemble:
         print("[TRAIN] Training stream classifier...")
         self.stream_clf.fit(X_stream, y_stream, feature_names)
         print("[TRAIN] Training course classifier...")

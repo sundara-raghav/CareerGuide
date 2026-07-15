@@ -1,5 +1,6 @@
 """SQLAlchemy ORM models — User and authentication."""
-from datetime import datetime, timezone
+
+from datetime import UTC, datetime
 from enum import Enum as PyEnum
 
 from flask_login import UserMixin
@@ -28,7 +29,9 @@ class User(UserMixin, db.Model):
     supabase_uid: Mapped[str] = mapped_column(String(64), unique=True, nullable=True, index=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.STUDENT, nullable=False)
+    role: Mapped[UserRole] = mapped_column(
+        Enum(UserRole, values_callable=lambda x: [e.value for e in x]), default=UserRole.STUDENT, nullable=False
+    )
     phone: Mapped[str | None] = mapped_column(String(20))
     preferred_language: Mapped[str] = mapped_column(String(10), default="en")
     password_hash: Mapped[str | None] = mapped_column(Text)
@@ -36,13 +39,11 @@ class User(UserMixin, db.Model):
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     avatar_url: Mapped[str | None] = mapped_column(Text)
     last_login: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     # Relationships

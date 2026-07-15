@@ -3,6 +3,7 @@ Flask extensions — instantiated here, initialized in app factory.
 
 Keeping them separate from __init__.py prevents circular imports.
 """
+
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address

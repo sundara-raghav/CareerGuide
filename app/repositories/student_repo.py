@@ -1,4 +1,5 @@
 """Student-specific repository queries."""
+
 from sqlalchemy import select
 
 from app.models.student import Student
@@ -32,6 +33,7 @@ class StudentRepository(BaseRepository[Student]):
 
     def count_by_district(self) -> list[dict]:
         from sqlalchemy import func
+
         stmt = (
             select(Student.district, Student.state, func.count().label("count"))
             .group_by(Student.district, Student.state)

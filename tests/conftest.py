@@ -1,11 +1,12 @@
 """Test fixtures and app factory for the test suite."""
+
 import pytest
 
 from app import create_app
 from app.extensions import db as _db
-from app.models.user import User, UserRole
-from app.models.student import Student
 from app.models.college import College
+from app.models.student import Student
+from app.models.user import User, UserRole
 
 
 @pytest.fixture(scope="session")
@@ -34,6 +35,7 @@ def client(app):
 @pytest.fixture
 def sample_user(db):
     from werkzeug.security import generate_password_hash
+
     user = User(
         name="Test Student",
         email="test@example.com",

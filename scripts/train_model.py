@@ -19,8 +19,8 @@ Artifacts saved:
   - ensemble.pkl (full CareerRecommendationEnsemble)
   - metrics.json
 """
+
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -28,13 +28,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from app.ml.ensemble import CareerRecommendationEnsemble
 from app.ml.pipeline import build_preprocessing_pipeline
-
 
 ARTIFACTS_DIR = Path("app/ml/artifacts")
 DATA_PATH = Path("data/synthetic_students.csv")
@@ -43,7 +41,8 @@ DATA_PATH = Path("data/synthetic_students.csv")
 def load_or_generate_data() -> pd.DataFrame:
     if not DATA_PATH.exists():
         print("[DATA] Dataset not found -- generating...")
-        from scripts.generate_dataset import generate_dataset, main as gen_main
+        from scripts.generate_dataset import main as gen_main
+
         gen_main()
     return pd.read_csv(DATA_PATH)
 
@@ -68,20 +67,25 @@ def main() -> None:
     print(f"Preprocessed: {X.shape[1]} features, {X.shape[0]} samples.")
 
     # ── Train / test split ────────────────────────────────────────────────────
-    (X_train, X_test,
-     ys_train, ys_test,
-     yc_train, yc_test,
-     ycar_train, ycar_test) = train_test_split(
-        X, y_stream, y_course, y_career,
-        test_size=0.2, random_state=42, stratify=y_stream,
+    (X_train, X_test, ys_train, ys_test, yc_train, yc_test, ycar_train, ycar_test) = train_test_split(
+        X,
+        y_stream,
+        y_course,
+        y_career,
+        test_size=0.2,
+        random_state=42,
+        stratify=y_stream,
     )
 
     # ── Train ensemble ────────────────────────────────────────────────────────
     ensemble = CareerRecommendationEnsemble()
     ensemble.fit(
-        X_train, ys_train,
-        X_train, yc_train,
-        X_train, ycar_train,
+        X_train,
+        ys_train,
+        X_train,
+        yc_train,
+        X_train,
+        ycar_train,
         feature_names=feature_names,
     )
 
@@ -115,7 +119,9 @@ def main() -> None:
 
     with open(ARTIFACTS_DIR / "metrics.json", "w") as f:
         # Remove non-serializable report dicts for top-level metrics file
-        clean = {k: {kk: vv for kk, vv in v.items() if kk != "report"} for k, v in metrics.items() if isinstance(v, dict)}
+        clean = {
+            k: {kk: vv for kk, vv in v.items() if kk != "report"} for k, v in metrics.items() if isinstance(v, dict)
+        }
         json.dump(clean, f, indent=2)
 
     print(f"\nArtifacts saved to {ARTIFACTS_DIR}/")

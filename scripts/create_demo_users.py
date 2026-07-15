@@ -12,6 +12,7 @@ parent      parent@demo.com             Demo@1234
 counselor   counselor@demo.com          Demo@1234
 admin       admin@demo.com              Admin@1234
 """
+
 import os
 import sys
 
@@ -19,13 +20,15 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from dotenv import load_dotenv
+
 load_dotenv()
+
+from werkzeug.security import generate_password_hash
 
 from app import create_app
 from app.extensions import db
 from app.models.student import Student
 from app.models.user import User, UserRole
-from werkzeug.security import generate_password_hash
 
 DEMO_USERS = [
     {

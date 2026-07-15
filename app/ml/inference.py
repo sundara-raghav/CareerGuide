@@ -7,6 +7,7 @@ Usage (from Flask route):
     result = get_recommendation(student, aptitude_score)
     # result = {stream, courses, careers, explanations, scholarship_matches}
 """
+
 from __future__ import annotations
 
 import os
@@ -19,8 +20,8 @@ import numpy as np
 import pandas as pd
 
 if TYPE_CHECKING:
-    from app.models.student import Student
     from app.models.quiz import AptitudeScore
+    from app.models.student import Student
 
 _ARTIFACTS_DIR = Path(os.getenv("ML_ARTIFACTS_DIR", "app/ml/artifacts"))
 _ENSEMBLE_PATH = _ARTIFACTS_DIR / "ensemble.pkl"
@@ -31,10 +32,7 @@ _PIPELINE_PATH = _ARTIFACTS_DIR / "preprocessing_pipeline.pkl"
 def _load_ensemble():
     """Load and cache ensemble — called once per worker process."""
     if not _ENSEMBLE_PATH.exists():
-        raise FileNotFoundError(
-            f"Model artifact not found at {_ENSEMBLE_PATH}. "
-            "Run: python scripts/train_model.py"
-        )
+        raise FileNotFoundError(f"Model artifact not found at {_ENSEMBLE_PATH}. " "Run: python scripts/train_model.py")
     return joblib.load(_ENSEMBLE_PATH)
 
 
@@ -45,7 +43,7 @@ def _load_pipeline():
     return joblib.load(_PIPELINE_PATH)
 
 
-def _student_to_dataframe(student: "Student", aptitude: "AptitudeScore") -> pd.DataFrame:
+def _student_to_dataframe(student: Student, aptitude: AptitudeScore) -> pd.DataFrame:
     """Convert ORM objects to a one-row DataFrame matching training features."""
     marks = student.marks or {}
 
@@ -83,9 +81,22 @@ def _student_to_dataframe(student: "Student", aptitude: "AptitudeScore") -> pd.D
 
     interests = set(student.interests or [])
     interest_pool = [
-        "mathematics", "biology", "computers", "sports", "arts", "music",
-        "social_service", "business", "nature", "writing", "politics", "cooking",
-        "electronics", "farming", "healthcare", "teaching",
+        "mathematics",
+        "biology",
+        "computers",
+        "sports",
+        "arts",
+        "music",
+        "social_service",
+        "business",
+        "nature",
+        "writing",
+        "politics",
+        "cooking",
+        "electronics",
+        "farming",
+        "healthcare",
+        "teaching",
     ]
     for interest in interest_pool:
         row[f"interest_{interest}"] = int(interest in interests)
@@ -94,8 +105,8 @@ def _student_to_dataframe(student: "Student", aptitude: "AptitudeScore") -> pd.D
 
 
 def get_recommendation(
-    student: "Student",
-    aptitude: "AptitudeScore",
+    student: Student,
+    aptitude: AptitudeScore,
 ) -> dict:
     """
     Main inference entry point called from recommendation_service.py.
@@ -109,7 +120,7 @@ def get_recommendation(
     # Transform through preprocessing pipeline
     try:
         X = pipeline.transform(df)
-    except Exception as exc:
+    except Exception:
         # If pipeline transform fails (e.g., unseen categories), use zeros
         n_features = len(pipeline.named_steps["col_select"].feature_cols_)
         X = np.zeros((1, n_features))

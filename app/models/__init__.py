@@ -1,4 +1,5 @@
 """Models package — imports all models so SQLAlchemy can register them."""
+
 from app.models.college import College, Scholarship
 from app.models.notification import Notification
 from app.models.quiz import AptitudeScore, QuizAttempt

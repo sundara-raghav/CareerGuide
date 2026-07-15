@@ -1,5 +1,4 @@
 """Integration tests for Flask routes."""
-import pytest
 
 
 class TestHealthCheck:
@@ -22,21 +21,29 @@ class TestAuthRoutes:
         assert b"Welcome Back" in resp.data
 
     def test_register_creates_user(self, client, db):
-        resp = client.post("/auth/register", data={
-            "name": "Integration Test User",
-            "email": "integration@test.com",
-            "password": "securePass1",
-            "role": "student",
-            "phone": "",
-        }, follow_redirects=False)
+        resp = client.post(
+            "/auth/register",
+            data={
+                "name": "Integration Test User",
+                "email": "integration@test.com",
+                "password": "securePass1",
+                "role": "student",
+                "phone": "",
+            },
+            follow_redirects=False,
+        )
         # Should redirect after successful registration
         assert resp.status_code in (302, 200)
 
     def test_login_invalid_credentials(self, client):
-        resp = client.post("/auth/login", data={
-            "email": "nobody@example.com",
-            "password": "wrongpassword",
-        }, follow_redirects=True)
+        resp = client.post(
+            "/auth/login",
+            data={
+                "email": "nobody@example.com",
+                "password": "wrongpassword",
+            },
+            follow_redirects=True,
+        )
         assert b"Invalid email or password" in resp.data
 
 

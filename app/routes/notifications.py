@@ -1,5 +1,6 @@
 """Remaining routes — notifications and analytics (separate files)."""
-from flask import Blueprint, jsonify, request
+
+from flask import Blueprint, jsonify
 from flask_login import current_user, login_required
 
 from app.services.notification_service import NotificationService

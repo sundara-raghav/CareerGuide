@@ -1,5 +1,7 @@
 """Application entry point for development."""
+
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

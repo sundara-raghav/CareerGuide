@@ -1,8 +1,8 @@
 """Recommendation service — orchestrates ML inference + scholarship matching."""
+
 from __future__ import annotations
 
 import structlog
-from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.ml.inference import get_recommendation
@@ -129,6 +129,7 @@ class RecommendationService:
         recommended_course: str,
     ) -> None:
         from app.models.recommendation import ModelFeedback
+
         feedback = ModelFeedback(
             recommendation_id=recommendation_id,
             student_id=student_id,
@@ -149,11 +150,12 @@ class RecommendationService:
             return []
 
         recommended_course_names = {c["label"].lower() for c in recommendation.top_courses}
-        
+
         # Load all active colleges
         from app.models.college import College
+
         colleges = db.session.query(College).filter_by(is_active=True).all()
-        
+
         matched = []
         for c in colleges:
             # Check if college offers at least one recommended course
@@ -164,43 +166,38 @@ class RecommendationService:
                     if course_name in rec_course or rec_course in course_name:
                         matching_courses.append(course_offered.get("name", ""))
                         break
-            
+
             if not matching_courses:
                 continue
-                
+
             # Filter by education budget
             if student.budget_for_education and c.annual_fees_min:
                 if c.annual_fees_min > student.budget_for_education:
                     continue
-            
+
             # Compute distance if coordinates available
             distance = None
             if student.latitude and student.longitude and c.latitude and c.longitude:
                 from app.repositories.college_repo import _haversine
+
                 distance = _haversine(student.latitude, student.longitude, c.latitude, c.longitude)
-                
+
             # Compute score/rank based on matching district & distance
             score = 0.0
             if student.district and c.district.lower() == student.district.lower():
                 score += 100.0  # Big boost for same district
-            
+
             if distance is not None:
                 # Closer colleges get higher scores (max 50 points)
                 score += max(0, 50.0 - (distance / 2.0))
-                
-            matched.append({
-                "college": c,
-                "matching_courses": matching_courses,
-                "distance": distance,
-                "score": score
-            })
-            
+
+            matched.append({"college": c, "matching_courses": matching_courses, "distance": distance, "score": score})
+
         # Sort matched colleges by score descending
         matched.sort(key=lambda x: x["score"], reverse=True)
-        
+
         # Limit to top 5 recommended colleges
         return matched[:5]
-
 
 
 def _match_scholarships(student: Student) -> list[dict]:
@@ -214,16 +211,18 @@ def _match_scholarships(student: Student) -> list[dict]:
     for s in scholarships:
         score = _compute_scholarship_score(student, s)
         if score > 0.4:
-            results.append({
-                "scholarship_id": s.id,
-                "name": s.name,
-                "provider": s.provider,
-                "amount": s.amount_description or f"₹{s.amount:,.0f}" if s.amount else "Variable",
-                "deadline": s.deadline.isoformat() if s.deadline else None,
-                "application_link": s.application_link,
-                "score": round(score, 3),
-                "eligible": score >= 0.7,
-            })
+            results.append(
+                {
+                    "scholarship_id": s.id,
+                    "name": s.name,
+                    "provider": s.provider,
+                    "amount": s.amount_description or f"₹{s.amount:,.0f}" if s.amount else "Variable",
+                    "deadline": s.deadline.isoformat() if s.deadline else None,
+                    "application_link": s.application_link,
+                    "score": round(score, 3),
+                    "eligible": score >= 0.7,
+                }
+            )
 
     results.sort(key=lambda x: x["score"], reverse=True)
     return results[:10]
@@ -260,7 +259,6 @@ def _compute_scholarship_score(student: Student, scholarship: Scholarship) -> fl
 def _rule_based_fallback(student: Student, aptitude: AptitudeScore) -> dict:
     """Deterministic fallback when ML model is not available."""
     apt = aptitude
-    marks = student.aggregate_percentage or 50.0
 
     # Simple rule: highest aptitude domain wins
     scores = {
@@ -278,7 +276,9 @@ def _rule_based_fallback(student: Student, aptitude: AptitudeScore) -> dict:
         "Arts": ["BA English", "BA Psychology", "BA Social Work", "BJournalism", "BA Economics"],
         "Vocational": ["ITI Electrician", "Diploma Engineering", "Polytechnic", "Paramedical Diploma", "ITI Fitter"],
     }
-    courses = [{"rank": i + 1, "label": c, "confidence": round(conf - i * 0.05, 3)} for i, c in enumerate(courses_map[stream])]
+    courses = [
+        {"rank": i + 1, "label": c, "confidence": round(conf - i * 0.05, 3)} for i, c in enumerate(courses_map[stream])
+    ]
 
     return {
         "recommended_stream": stream,
