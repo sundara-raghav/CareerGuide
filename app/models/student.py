@@ -18,8 +18,8 @@ class Student(db.Model):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, nullable=False)
-    student_class: Mapped[int] = mapped_column(Integer, nullable=False)  # 10 or 12
-    board: Mapped[str] = mapped_column(String(50), nullable=False)  # CBSE, State, ICSE
+    student_class: Mapped[int | None] = mapped_column(Integer, nullable=True)  # 10 or 12
+    board: Mapped[str | None] = mapped_column(String(50), nullable=True)  # CBSE, State, ICSE
     school_name: Mapped[str | None] = mapped_column(String(255))
     school_type: Mapped[str] = mapped_column(String(20), default="government")  # government/private
 

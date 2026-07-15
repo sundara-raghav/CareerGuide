@@ -62,7 +62,7 @@ DEMO_USERS = [
 def create_demo_users():
     app = create_app("development")
     with app.app_context():
-        db.create_all()
+        # db.create_all()
         created = []
         skipped = []
 
