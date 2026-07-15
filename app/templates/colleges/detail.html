@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}{{ college.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-12">
+  <div class="animate-fade-in">
+    <!-- Back Navigation -->
+    <div class="mb-6">
+      <a href="{{ url_for('colleges.map_view') }}" class="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors">
+        ← Back to Colleges Map
+      </a>
+    </div>
+
+    <!-- College Header Card -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-brand-900/40 to-gray-900 border border-brand-800/40 shadow-2xl mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-brand-900/50 text-brand-400 border border-brand-800/50 uppercase">
+            {{ college.college_type }}
+          </span>
+          {% if college.accreditation %}
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-saffron-950/50 text-saffron-400 border border-saffron-800/50">
+              NAAC {{ college.accreditation }}
+            </span>
+          {% endif %}
+        </div>
+        <h1 class="font-display text-3xl font-extrabold text-white mt-3">{{ college.name }}</h1>
+        <p class="text-gray-400 mt-2 flex items-center gap-1.5 text-sm">
+          <span>📍</span> {{ college.address or college.district + ', ' + college.state }}
+        </p>
+      </div>
+
+      <div class="flex flex-col items-end gap-1 text-right flex-shrink-0">
+        <p class="text-xs text-gray-500">Established</p>
+        <p class="text-lg font-bold text-white">{{ college.established_year or 'N/A' }}</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Left Column: Details & Facilities -->
+      <div class="md:col-span-2 space-y-8">
+        
+        <!-- Courses Offered -->
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60 shadow-xl">
+          <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span class="text-saffron-400">📚</span> Courses Offered
+          </h2>
+          {% if college.courses_offered %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {% for course in college.courses_offered %}
+                <div class="p-4 rounded-xl bg-gray-950 border border-gray-850">
+                  <h3 class="font-bold text-white text-sm">{{ course.name }}</h3>
+                  <div class="mt-2 space-y-1 text-xs text-gray-400">
+                    <div class="flex justify-between">
+                      <span>Seats:</span>
+                      <span class="text-white">{{ course.seats or 'N/A' }}</span>
+                    </div>
+                    {% if course.annual_fees %}
+                      <div class="flex justify-between">
+                        <span>Fees:</span>
+                        <span class="text-brand-400 font-semibold">₹{{ '{:,.0f}'.format(course.annual_fees) }}/yr</span>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-xs text-gray-500">No courses listed.</p>
+          {% endif %}
+        </div>
+
+        <!-- Cutoff Data -->
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60 shadow-xl">
+          <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span class="text-emerald-400">📊</span> Cutoff Percentages
+          </h2>
+          {% if college.cutoff_data %}
+            <div class="space-y-4">
+              {% for year, cutoffs in college.cutoff_data.items() %}
+                <div>
+                  <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ year }} Cutoffs</h3>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {% for stream, val in cutoffs.items() %}
+                      <div class="p-3 rounded-lg bg-gray-950 border border-gray-855 flex items-center justify-between text-xs">
+                        <span class="text-gray-400 capitalize">{{ stream }}</span>
+                        <span class="text-emerald-400 font-bold">{{ val }}%</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-xs text-gray-500">Cutoff information is not available.</p>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Right Column: Quick Stats & Contacts -->
+      <div class="space-y-8">
+        
+        <!-- Quick Stats -->
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60 shadow-xl space-y-4">
+          <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Key Details</h2>
+          
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-1.5 border-b border-gray-850">
+              <span class="text-gray-500">Annual Fees</span>
+              <span class="text-white font-medium">
+                {% if college.annual_fees_min %}
+                  ₹{{ '{:,.0f}'.format(college.annual_fees_min) }} - ₹{{ '{:,.0f}'.format(college.annual_fees_max) if college.annual_fees_max else 'N/A' }}
+                {% else %}
+                  N/A
+                {% endif %}
+              </span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-gray-850">
+              <span class="text-gray-500">Hostel Facility</span>
+              <span class="font-semibold {% if college.has_hostel %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                {% if college.has_hostel %}Available{% else %}Not Available{% endif %}
+              </span>
+            </div>
+            <div class="flex justify-between py-1.5 border-b border-gray-850">
+              <span class="text-gray-500">Transport Facility</span>
+              <span class="font-semibold {% if college.has_transport %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                {% if college.has_transport %}Available{% else %}Not Available{% endif %}
+              </span>
+            </div>
+            <div class="flex justify-between py-1.5">
+              <span class="text-gray-500">Instruction Medium</span>
+              <span class="text-white font-medium">
+                {{ college.medium_of_instruction | join(', ') if college.medium_of_instruction else 'English' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60 shadow-xl space-y-4">
+          <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Contact Information</h2>
+          
+          <div class="space-y-3 text-sm">
+            {% if college.website %}
+              <div>
+                <p class="text-xs text-gray-500">Website</p>
+                <a href="{{ college.website }}" target="_blank" class="text-brand-400 hover:underline break-all text-xs">
+                  {{ college.website }}
+                </a>
+              </div>
+            {% endif %}
+            {% if college.phone %}
+              <div>
+                <p class="text-xs text-gray-500">Phone</p>
+                <p class="text-white text-xs">{{ college.phone }}</p>
+              </div>
+            {% endif %}
+            {% if college.email %}
+              <div>
+                <p class="text-xs text-gray-500">Email Address</p>
+                <p class="text-white text-xs break-all">{{ college.email }}</p>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

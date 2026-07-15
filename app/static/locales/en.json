@@ -1,0 +1,23 @@
+{
+  "hero_title": "Your Future, Clearly Mapped.",
+  "hero_desc": "Free AI career counseling for Class 10 & 12 students.",
+  "get_started": "Get Started",
+  "login": "Login",
+  "logout": "Logout",
+  "dashboard": "Dashboard",
+  "colleges": "Colleges",
+  "my_path": "My Path",
+  "aptitude_quiz": "Aptitude Quiz",
+  "recommendations": "Recommendations",
+  "scholarships": "Scholarships",
+  "career_roadmap": "Career Roadmap",
+  "onboarding_title": "Build Your Profile",
+  "step": "Step",
+  "next": "Next",
+  "back": "Back",
+  "submit": "Submit",
+  "complete": "Complete",
+  "loading": "Loading...",
+  "error": "Something went wrong. Please try again.",
+  "success": "Done!"
+}

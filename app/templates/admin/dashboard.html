@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Admin Analytics Dashboard{% endblock %}
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-10">
+  <div class="mb-8">
+    <h1 class="font-display text-3xl font-bold text-white">Platform Analytics</h1>
+    <p class="text-gray-400">Real-time impact data across all districts.</p>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-10">
+    {% set kpis = [
+      ('👥', 'Total Students', stats.total_students, 'brand'),
+      ('✅', 'Onboarding Rate', stats.onboarding_rate ~ '%', 'emerald'),
+      ('📝', 'Quiz Completion', stats.quiz_completion_rate ~ '%', 'blue'),
+      ('🤖', 'Recommendations', stats.total_recommendations, 'purple'),
+      ('👍', 'Acceptance Rate', stats.acceptance_rate ~ '%', 'saffron'),
+    ] %}
+    {% for icon, label, value, color in kpis %}
+      <div class="p-5 rounded-2xl bg-gray-900/60 border border-gray-700/40 text-center hover:border-{{ color }}-700/40 transition-all duration-300">
+        <div class="text-3xl mb-2">{{ icon }}</div>
+        <p class="font-display text-2xl font-extrabold text-white">{{ value }}</p>
+        <p class="text-xs text-gray-500 mt-1">{{ label }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Stream distribution chart -->
+    <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-700/40">
+      <h3 class="font-semibold text-white mb-4">Stream Distribution</h3>
+      <canvas id="streamChart" height="200"></canvas>
+    </div>
+
+    <!-- District heatmap table -->
+    <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-700/40">
+      <h3 class="font-semibold text-white mb-4">Top Districts by Students</h3>
+      <div class="space-y-2 max-h-64 overflow-y-auto">
+        {% for d in district_data[:15] %}
+          <div class="flex items-center gap-3">
+            <div class="flex-1">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-gray-300">{{ d.district or 'Unknown' }}</span>
+                <span class="text-gray-500">{{ d.count }}</span>
+              </div>
+              <div class="bg-gray-800 rounded-full h-1.5"><div class="h-full bg-brand-500 rounded-full" style="width: {{ [d.count / [district_data[0].count, 1] | max * 100, 100] | min }}%"></div></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Students Table -->
+  <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-700/40">
+    <h3 class="font-semibold text-white mb-4">Recent Students</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-xs text-gray-500 border-b border-gray-800">
+            <th class="text-left py-3 font-medium">ID</th>
+            <th class="text-left py-3 font-medium">Class</th>
+            <th class="text-left py-3 font-medium">Board</th>
+            <th class="text-left py-3 font-medium">District</th>
+            <th class="text-left py-3 font-medium">Aggregate</th>
+            <th class="text-left py-3 font-medium">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-800/50">
+          {% for s in recent_students %}
+            <tr class="hover:bg-gray-800/40 transition-colors">
+              <td class="py-3 text-gray-500">#{{ s.id }}</td>
+              <td class="py-3 text-gray-300">Class {{ s.student_class }}</td>
+              <td class="py-3 text-gray-300">{{ s.board or '—' }}</td>
+              <td class="py-3 text-gray-300">{{ s.district or '—' }}</td>
+              <td class="py-3 text-white font-medium">{{ s.aggregate_percentage or '—' }}{% if s.aggregate_percentage %}%{% endif %}</td>
+              <td class="py-3">
+                {% if s.quiz_complete %}
+                  <span class="px-2 py-0.5 rounded-full text-xs bg-emerald-900/40 text-emerald-400 border border-emerald-800/40">Quiz Done</span>
+                {% elif s.onboarding_complete %}
+                  <span class="px-2 py-0.5 rounded-full text-xs bg-blue-900/40 text-blue-400 border border-blue-800/40">Onboarded</span>
+                {% else %}
+                  <span class="px-2 py-0.5 rounded-full text-xs bg-gray-700/40 text-gray-500 border border-gray-700/40">Incomplete</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const streamData = {{ stream_dist | tojson }};
+const ctx = document.getElementById('streamChart').getContext('2d');
+new Chart(ctx, {
+  type: 'doughnut',
+  data: {
+    labels: streamData.map(d => d.stream),
+    datasets: [{
+      data: streamData.map(d => d.count),
+      backgroundColor: ['#3b82f6', '#10b981', '#f97316', '#8b5cf6'],
+      borderColor: '#1f2937', borderWidth: 2,
+    }],
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#9ca3af', font: { size: 12 } } },
+    },
+  },
+});
+
+gsap.from('.p-5, .p-6', { y: 20, opacity: 0, duration: 0.6, stagger: 0.1, ease: 'power2.out', delay: 0.2 });
+</script>
+{% endblock %}

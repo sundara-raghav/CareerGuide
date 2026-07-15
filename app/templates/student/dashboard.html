@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+
+  <!-- Welcome & Profile Card -->
+  <div class="mb-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-brand-900/50 to-gray-900 border border-brand-800/40 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 animate-fade-in">
+    <div>
+      <p class="text-brand-400 text-sm font-semibold uppercase tracking-wider mb-2">Student Portal</p>
+      <h1 class="font-display text-4xl font-extrabold text-white">Welcome back, {{ user.name }}!</h1>
+      <p class="text-gray-400 mt-2">Track your learning goals, aptitude results, and personalized career recommendations.</p>
+    </div>
+    <div class="flex gap-3">
+      <a href="{{ url_for('auth.profile') }}" class="px-5 py-3 rounded-xl border border-gray-700 hover:bg-gray-800 text-gray-300 text-sm font-semibold transition-colors">
+        Edit Profile
+      </a>
+      {% if student and not student.onboarding_complete %}
+        <a href="{{ url_for('student.onboarding') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white text-sm font-bold shadow-lg shadow-brand-900/40 hover:scale-105 transition-all">
+          Complete Onboarding →
+        </a>
+      {% elif student and not student.quiz_complete %}
+        <a href="{{ url_for('student.quiz') }}" class="px-5 py-3 rounded-xl bg-gradient-to-r from-saffron-500 to-saffron-600 hover:from-saffron-400 hover:to-saffron-500 text-white text-sm font-bold shadow-lg shadow-saffron-900/40 hover:scale-105 transition-all">
+          Take Aptitude Quiz →
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Left Column: Steps/Checklist & Academic Marks -->
+    <div class="lg:col-span-2 space-y-8">
+      
+      <!-- Guided Checklist / Progress Tracker -->
+      <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+        <h2 class="text-lg font-bold text-white mb-5 flex items-center gap-2">
+          <span class="text-brand-400">⚡</span> Your Career Journey Steps
+        </h2>
+        
+        <div class="space-y-4">
+          <!-- Step 1: Onboarding -->
+          <div class="flex items-start gap-4 p-4 rounded-xl {% if student and student.onboarding_complete %}bg-emerald-950/20 border border-emerald-900/40{% else %}bg-gray-800/40 border border-gray-700/30{% endif %}">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm {% if student and student.onboarding_complete %}bg-emerald-500/20 text-emerald-400{% else %}bg-gray-700 text-gray-400{% endif %} flex-shrink-0">
+              {% if student and student.onboarding_complete %}✓{% else %}1{% endif %}
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-sm {% if student and student.onboarding_complete %}text-emerald-300{% else %}text-white{% endif %}">Step 1: Academic & Preference Setup</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Define your current class (10th/12th), board, stream interest, and location preferences.</p>
+            </div>
+            {% if student and not student.onboarding_complete %}
+              <a href="{{ url_for('student.onboarding') }}" class="text-xs px-3 py-1.5 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-500">Start</a>
+            {% endif %}
+          </div>
+
+          <!-- Step 2: Aptitude Quiz -->
+          <div class="flex items-start gap-4 p-4 rounded-xl {% if student and student.quiz_complete %}bg-emerald-950/20 border border-emerald-900/40{% elif student and student.onboarding_complete %}bg-brand-950/20 border border-brand-900/40{% else %}bg-gray-900/30 border border-gray-800/20 opacity-50{% endif %}">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm {% if student and student.quiz_complete %}bg-emerald-500/20 text-emerald-400{% elif student and student.onboarding_complete %}bg-brand-500/20 text-brand-400{% else %}bg-gray-800 text-gray-500{% endif %} flex-shrink-0">
+              {% if student and student.quiz_complete %}✓{% else %}2{% endif %}
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-sm {% if student and student.quiz_complete %}text-emerald-300{% else %}text-white{% endif %}">Step 2: Interactive Aptitude Assessment</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Answer situational questions across sections like logic, language, and interests.</p>
+            </div>
+            {% if student and student.onboarding_complete and not student.quiz_complete %}
+              <a href="{{ url_for('student.quiz') }}" class="text-xs px-3 py-1.5 rounded-lg bg-saffron-600 text-white font-medium hover:bg-saffron-500">Take Quiz</a>
+            {% endif %}
+          </div>
+
+          <!-- Step 3: Recommendations -->
+          <div class="flex items-start gap-4 p-4 rounded-xl {% if recommendation %}bg-emerald-950/20 border border-emerald-900/40{% else %}bg-gray-900/30 border border-gray-800/20 opacity-50{% endif %}">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm {% if recommendation %}bg-emerald-500/20 text-emerald-400{% else %}bg-gray-800 text-gray-500{% endif %} flex-shrink-0">
+              {% if recommendation %}✓{% else %}3{% endif %}
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-sm {% if recommendation %}text-emerald-300{% else %}text-white{% endif %}">Step 3: AI Recommendations & Roadmaps</h3>
+              <p class="text-xs text-gray-500 mt-0.5">Explore personalized streams, best colleges, and direct career paths tailored for you.</p>
+            </div>
+            {% if recommendation %}
+              <a href="{{ url_for('recommendations.dashboard') }}" class="text-xs px-3 py-1.5 rounded-lg bg-brand-600 text-white font-medium hover:bg-brand-500">View Path</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Academics & Marks card -->
+      {% if student and student.onboarding_complete %}
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+          <div class="flex items-center justify-between mb-5">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span class="text-saffron-400">🏫</span> Academic Profile
+            </h2>
+            <span class="text-xs text-gray-500">Class {{ student.student_class }}th ({{ student.board }} Board)</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="p-4 rounded-xl bg-gray-800/40 border border-gray-700/30 text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wider">Aggregate Percentage</p>
+              <p class="text-3xl font-extrabold text-brand-400 mt-1">
+                {% if student.aggregate_percentage %}{{ student.aggregate_percentage }}%{% else %}N/A{% endif %}
+              </p>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-800/40 border border-gray-700/30 text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wider">School Type</p>
+              <p class="text-xl font-bold text-white mt-2 capitalize">{{ student.school_type or 'Government' }}</p>
+            </div>
+            <div class="p-4 rounded-xl bg-gray-800/40 border border-gray-700/30 text-center">
+              <p class="text-xs text-gray-500 uppercase tracking-wider">Preferred Stream</p>
+              <p class="text-xl font-bold text-white mt-2 capitalize">{{ student.stream_preference or 'Science' }}</p>
+            </div>
+          </div>
+
+          {% if student.marks %}
+            <div class="space-y-3">
+              <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Subject-wise Marks</p>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {% for sub, score in student.marks.items() %}
+                  <div class="p-3 rounded-lg bg-gray-800/20 border border-gray-800/60 flex items-center justify-between">
+                    <span class="text-xs text-gray-300 capitalize">{{ sub | replace('_', ' ') }}</span>
+                    <span class="text-xs font-bold text-white">{{ score }}%</span>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Right Column: AI Path Preview & Constraints -->
+    <div class="space-y-8">
+      
+      <!-- AI Recommendation Preview -->
+      <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span class="text-emerald-400">🤖</span> Recommendation Preview
+        </h2>
+
+        {% if recommendation %}
+          <div class="p-4 rounded-xl bg-gradient-to-br from-brand-950/40 to-brand-900/10 border border-brand-800/30 mb-5">
+            <p class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Best Career Stream</p>
+            <p class="text-2xl font-bold text-white mt-1">{{ recommendation.recommended_stream }}</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="text-xs bg-brand-500/20 text-brand-300 px-2 py-0.5 rounded-full">
+                Confidence: {{ (recommendation.stream_confidence * 100) | round(0) | int }}%
+              </span>
+            </div>
+          </div>
+
+          {% if recommendation.top_courses %}
+            <div class="space-y-3 mb-6">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Recommended Courses</p>
+              {% for course in recommendation.top_courses[:3] %}
+                <div class="flex items-center justify-between text-xs py-1 border-b border-gray-800">
+                  <span class="text-gray-300">{{ course.label }}</span>
+                  <span class="text-emerald-400 font-semibold">{{ (course.confidence * 100) | round(0) | int }}% match</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <a href="{{ url_for('recommendations.dashboard') }}" class="block w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs text-center transition-colors">
+            View Full Recommendations →
+          </a>
+        {% else %}
+          <div class="text-center py-8 text-gray-500">
+            <p class="text-3xl mb-2">📊</p>
+            <p class="text-xs">No preview available yet.</p>
+            <p class="text-[10px] mt-1 text-gray-600">Complete the aptitude assessment to get started.</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Quick Tools Card -->
+      <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+        <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <span class="text-saffron-400">🛠️</span> Quick Tools
+        </h2>
+        
+        <div class="space-y-2">
+          <a href="{{ url_for('colleges.map_view') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-850 hover:bg-gray-800 text-sm text-gray-300 transition-colors border border-gray-800">
+            <span class="flex items-center gap-2">🗺️ College Map Explorer</span>
+            <span class="text-gray-600">→</span>
+          </a>
+          <a href="{{ url_for('recommendations.dashboard') }}" class="flex items-center justify-between p-3 rounded-xl bg-gray-850 hover:bg-gray-800 text-sm text-gray-300 transition-colors border border-gray-800">
+            <span class="flex items-center gap-2">🚀 Personalized Roadmaps</span>
+            <span class="text-gray-600">→</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Location & Constraints Card -->
+      {% if student and student.onboarding_complete %}
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-800/60">
+          <h2 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <span class="text-gray-400">📍</span> Preferences & Constraints
+          </h2>
+
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between py-1 border-b border-gray-800">
+              <span class="text-gray-500">Location</span>
+              <span class="text-white">{{ student.district or 'Chennai' }}, {{ student.state or 'Tamil Nadu' }}</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-800">
+              <span class="text-gray-500">Search Radius</span>
+              <span class="text-white">{{ student.travel_radius_km | round(0) | int }} km</span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-800">
+              <span class="text-gray-500">Budget for College</span>
+              <span class="text-white">
+                {% if student.budget_for_education %}₹{{ '{:,.0f}'.format(student.budget_for_education) }}/yr{% else %}Any{% endif %}
+              </span>
+            </div>
+            <div class="flex justify-between py-1 border-b border-gray-800">
+              <span class="text-gray-500">Hostel Required</span>
+              <span class="text-white font-semibold {% if student.needs_hostel %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                {% if student.needs_hostel %}Yes{% else %}No{% endif %}
+              </span>
+            </div>
+            <div class="flex justify-between py-1">
+              <span class="text-gray-500">Scholarship Required</span>
+              <span class="text-white font-semibold {% if student.needs_scholarship %}text-emerald-400{% else %}text-gray-400{% endif %}">
+                {% if student.needs_scholarship %}Yes{% else %}No{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

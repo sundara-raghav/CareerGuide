@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Career Roadmap — {{ course_name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-12">
+  <div class="mb-8">
+    <a href="{{ url_for('recommendations.dashboard') }}" class="text-brand-400 hover:text-brand-300 text-sm flex items-center gap-1 mb-4">← Back to Recommendations</a>
+    <h1 class="font-display text-4xl font-extrabold text-white">{{ course_name }}</h1>
+    <p class="text-gray-400 mt-2">Your complete career roadmap — from degree to dream job.</p>
+  </div>
+
+  <!-- Salary snapshot -->
+  <div class="grid grid-cols-3 gap-4 mb-12">
+    {% set cards = [
+      ('💰', 'Entry Salary', roadmap.salary_entry, 'from-brand-900/40 to-brand-800/20 border-brand-800/40'),
+      ('📈', 'Senior Salary', roadmap.salary_senior, 'from-emerald-900/40 to-emerald-800/20 border-emerald-800/40'),
+      ('🚀', 'Growth Outlook', roadmap.growth_outlook, 'from-saffron-900/40 to-orange-800/20 border-saffron-800/40'),
+    ] %}
+    {% for icon, label, value, style in cards %}
+      <div class="p-5 rounded-2xl bg-gradient-to-br {{ style }} border text-center animate-fade-in">
+        <div class="text-3xl mb-2">{{ icon }}</div>
+        <p class="text-xs text-gray-500 mb-1">{{ label }}</p>
+        <p class="font-display font-bold text-white text-lg">{{ value }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Visual roadmap timeline -->
+  <div class="relative">
+    <!-- Vertical line -->
+    <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-600 via-emerald-600 to-saffron-600 hidden md:block"></div>
+
+    <div class="space-y-8">
+      {% set steps = [
+        ('🎓', 'Degree / Course', course_name, 'brand', 'Complete this degree at a recognized college.'),
+        ('📋', 'Key Competitive Exams', roadmap.competitive_exams | join(', '), 'blue', 'These exams can accelerate your career or open government jobs.'),
+        ('💼', 'Job Opportunities', roadmap.jobs | join(', '), 'emerald', 'Roles you can apply for with this qualification.'),
+        ('🏫', 'Higher Studies', roadmap.higher_studies | join(', '), 'purple', 'Upgrade your qualification for specialized roles or research.'),
+        ('🚀', 'Entrepreneurial Paths', roadmap.entrepreneurial | join(', '), 'saffron', 'Start your own venture in this field.'),
+      ] %}
+      {% for icon, label, content, color, note in steps %}
+        <div class="flex gap-6 roadmap-step">
+          <div class="w-16 h-16 rounded-2xl bg-{{ color }}-900/40 border border-{{ color }}-700/40 flex items-center justify-center text-2xl flex-shrink-0 md:ml-0">{{ icon }}</div>
+          <div class="flex-1 pb-8">
+            <h3 class="font-display text-xl font-bold text-white mb-1">{{ label }}</h3>
+            <p class="text-gray-300 font-medium mb-2">{{ content }}</p>
+            <p class="text-sm text-gray-500">{{ note }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="mt-12 p-8 rounded-2xl bg-gradient-to-br from-brand-900/30 to-saffron-900/20 border border-brand-800/30 text-center">
+    <h3 class="font-display text-2xl font-bold text-white mb-2">Ready to take the next step?</h3>
+    <p class="text-gray-400 mb-6">Find colleges offering {{ course_name }} near your location.</p>
+    <a href="{{ url_for('colleges.map_view') }}" class="inline-block px-8 py-3 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold transition-all hover:scale-105">
+      🗺️ Find Colleges →
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+gsap.registerPlugin(ScrollTrigger);
+gsap.utils.toArray('.roadmap-step').forEach((el, i) => {
+  gsap.from(el, {
+    scrollTrigger: { trigger: el, start: 'top 85%' },
+    x: -30, opacity: 0, duration: 0.6, ease: 'power2.out', delay: i * 0.1,
+  });
+});
+</script>
+{% endblock %}

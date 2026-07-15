@@ -1,0 +1,31 @@
+# Environments
+.env
+.venv/
+venv/
+ENV/
+env/
+dist/
+build/
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+
+# Databases & local files
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# OS specific
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Flask/ML/logs
+*.log
+.pytest_cache/
+.coverage
+htmlcov/

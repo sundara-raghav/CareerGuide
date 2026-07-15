@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="{{ locale }}" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{% block meta_description %}CareerGuide India — AI-powered career and education advisor for Class 10 &amp; 12 students.{% endblock %}" />
+  <title>{% block title %}CareerGuide India{% endblock %} | {{ app_name }}</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Outfit', 'sans-serif'] },
+          colors: {
+            brand: {
+              50: '#eef6ff', 100: '#dbeafe', 200: '#bfdbfe',
+              300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+              600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+            },
+            saffron: { 400: '#fb923c', 500: '#f97316', 600: '#ea580c' },
+            emerald: { 400: '#34d399', 500: '#10b981', 600: '#059669' },
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.6s ease-out forwards',
+            'slide-up': 'slideUp 0.7s ease-out forwards',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: { '0%': { opacity: 0 }, '100%': { opacity: 1 } },
+            slideUp: { '0%': { opacity: 0, transform: 'translateY(30px)' }, '100%': { opacity: 1, transform: 'translateY(0)' } },
+            float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-20px)' } },
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- GSAP for advanced animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" />
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-gray-950 text-gray-100 font-sans antialiased min-h-screen">
+
+  <!-- ── Navigation ─────────────────────────────────────────────────────────── -->
+  <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <!-- Logo -->
+        <a href="{{ url_for('index') }}" class="flex items-center gap-2 group">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-saffron-500 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-200">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <span class="font-display text-lg font-bold bg-gradient-to-r from-brand-400 to-saffron-400 bg-clip-text text-transparent">CareerGuide</span>
+        </a>
+
+        <!-- Desktop nav -->
+        <div class="hidden md:flex items-center gap-6">
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('student.dashboard') }}" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition-colors">Dashboard</a>
+            <a href="{{ url_for('colleges.map_view') }}" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition-colors">Colleges</a>
+            <a href="{{ url_for('recommendations.dashboard') }}" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition-colors">My Path</a>
+            {% if current_user.role.value in ['admin', 'counselor'] %}
+              <a href="{{ url_for('admin.dashboard') }}" class="nav-link text-sm font-medium text-gray-300 hover:text-white transition-colors">Admin</a>
+            {% endif %}
+            <!-- Notifications bell -->
+            <button id="notif-bell" class="relative p-2 rounded-lg hover:bg-gray-800 transition-colors">
+              <svg class="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+              <span id="notif-count" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] font-bold flex items-center justify-center hidden">0</span>
+            </button>
+            <!-- Language selector -->
+            <select id="lang-select" onchange="switchLang(this.value)" class="bg-gray-800 text-gray-300 text-sm rounded-lg px-2 py-1 border border-gray-700 focus:outline-none focus:ring-1 focus:ring-brand-500">
+              <option value="en" {% if locale == 'en' %}selected{% endif %}>EN</option>
+              <option value="ta" {% if locale == 'ta' %}selected{% endif %}>TA</option>
+              <option value="hi" {% if locale == 'hi' %}selected{% endif %}>HI</option>
+            </select>
+            <a href="{{ url_for('auth.logout') }}" class="text-sm font-medium px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors text-gray-300">Logout</a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-gray-300 hover:text-white transition-colors">Login</a>
+            <a href="{{ url_for('auth.register') }}" class="text-sm font-bold px-5 py-2 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white shadow-lg shadow-brand-900/50 transition-all duration-200 hover:scale-105">Get Started</a>
+          {% endif %}
+        </div>
+
+        <!-- Mobile menu button -->
+        <button id="mobile-menu-btn" class="md:hidden p-2 rounded-lg hover:bg-gray-800 text-gray-400">
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-900 border-t border-gray-800 px-4 py-3 space-y-2">
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('student.dashboard') }}" class="block text-sm py-2 text-gray-300">Dashboard</a>
+        <a href="{{ url_for('colleges.map_view') }}" class="block text-sm py-2 text-gray-300">Colleges</a>
+        <a href="{{ url_for('recommendations.dashboard') }}" class="block text-sm py-2 text-gray-300">My Path</a>
+        <a href="{{ url_for('auth.logout') }}" class="block text-sm py-2 text-gray-300">Logout</a>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="block text-sm py-2 text-gray-300">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="block text-sm py-2 text-white font-semibold">Get Started</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ── Flash messages ─────────────────────────────────────────────────────── -->
+  <div class="fixed top-20 right-4 z-50 space-y-2" id="flash-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash-msg max-w-sm px-4 py-3 rounded-xl shadow-xl border backdrop-blur-sm flex items-start gap-3
+          {% if category == 'success' %}bg-emerald-900/80 border-emerald-700 text-emerald-100
+          {% elif category == 'danger' %}bg-red-900/80 border-red-700 text-red-100
+          {% elif category == 'warning' %}bg-amber-900/80 border-amber-700 text-amber-100
+          {% else %}bg-blue-900/80 border-blue-700 text-blue-100{% endif %}">
+          <p class="text-sm font-medium flex-1">{{ message }}</p>
+          <button onclick="this.parentElement.remove()" class="text-current opacity-60 hover:opacity-100 flex-shrink-0">✕</button>
+        </div>
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <!-- ── Main content ───────────────────────────────────────────────────────── -->
+  <main class="pt-16">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer class="mt-24 border-t border-gray-800 bg-gray-950">
+    <div class="max-w-7xl mx-auto px-4 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div>
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-brand-500 to-saffron-500 flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            </div>
+            <span class="font-display font-bold text-white">CareerGuide India</span>
+          </div>
+          <p class="text-sm text-gray-500">AI-powered career counseling for every student in India.</p>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-gray-300 mb-3">Platform</h4>
+          <ul class="space-y-2 text-sm text-gray-500">
+            <li><a href="{{ url_for('auth.register') }}" class="hover:text-gray-300 transition-colors">Get Started</a></li>
+            <li><a href="{{ url_for('colleges.map_view') }}" class="hover:text-gray-300 transition-colors">Find Colleges</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-gray-300 mb-3">Resources</h4>
+          <ul class="space-y-2 text-sm text-gray-500">
+            <li><a href="#" class="hover:text-gray-300 transition-colors">Scholarship Guide</a></li>
+            <li><a href="#" class="hover:text-gray-300 transition-colors">Exam Calendar</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-sm font-semibold text-gray-300 mb-3">Language / மொழி</h4>
+          <div class="flex gap-2">
+            {% for lang in ['en', 'ta', 'hi'] %}
+              <a href="?lang={{ lang }}" onclick="switchLang('{{ lang }}')" class="px-3 py-1 text-xs rounded-lg border border-gray-700 hover:border-brand-500 hover:text-brand-400 transition-colors text-gray-400">{{ lang.upper() }}</a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 pt-6 border-t border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p class="text-xs text-gray-600">© 2025 CareerGuide India. Built for students, by engineers who care.</p>
+        <p class="text-xs text-gray-600">Made in India 🇮🇳 | Multilingual | Offline-ready</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Global JS ──────────────────────────────────────────────────────────── -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 20) {
+        navbar.classList.add('bg-gray-950/90', 'backdrop-blur-md', 'border-b', 'border-gray-800', 'shadow-lg');
+      } else {
+        navbar.classList.remove('bg-gray-950/90', 'backdrop-blur-md', 'border-b', 'border-gray-800', 'shadow-lg');
+      }
+    });
+
+    // Mobile menu
+    document.getElementById('mobile-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('mobile-menu')?.classList.toggle('hidden');
+    });
+
+    // Language switcher
+    function switchLang(lang) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('lang', lang);
+      window.location.href = url.toString();
+    }
+
+    // Notification bell
+    async function loadNotifications() {
+      try {
+        const resp = await fetch('/notifications/api/unread');
+        const notifs = await resp.json();
+        const badge = document.getElementById('notif-count');
+        if (badge && notifs.length > 0) {
+          badge.textContent = notifs.length;
+          badge.classList.remove('hidden');
+        }
+      } catch {}
+    }
+
+    {% if current_user.is_authenticated %}
+      loadNotifications();
+      setInterval(loadNotifications, 60000);
+    {% endif %}
+
+    // Auto-dismiss flash messages
+    setTimeout(() => {
+      document.querySelectorAll('.flash-msg').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateX(100%)';
+        el.style.transition = 'all 0.4s ease';
+        setTimeout(() => el.remove(), 400);
+      });
+    }, 5000);
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

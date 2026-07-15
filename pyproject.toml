@@ -1,0 +1,26 @@
+# pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+filterwarnings = ["ignore::DeprecationWarning"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = ["migrations/", ".venv/", "app/ml/artifacts/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501", "N806"]
+
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+exclude = '''/(\.git|\.venv|migrations|app/ml/artifacts)/'''
+
+[tool.isort]
+profile = "black"
+line_length = 120

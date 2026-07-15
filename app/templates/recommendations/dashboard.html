@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+{% block title %}My Career Path{% endblock %}
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-12">
+
+  {% if not recommendation %}
+    <!-- No recommendation yet -->
+    <div class="text-center py-24">
+      <div class="text-6xl mb-4">🤖</div>
+      <h1 class="font-display text-3xl font-bold text-white mb-3">No Recommendations Yet</h1>
+      {% if not student.quiz_complete %}
+        <p class="text-gray-400 mb-8">Complete the aptitude quiz to get your personalized career path.</p>
+        <a href="{{ url_for('student.quiz') }}" class="inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold hover:scale-105 transition-all duration-300">Take Aptitude Quiz →</a>
+      {% else %}
+        <p class="text-gray-400 mb-8">Generating your recommendations...</p>
+        <a href="{{ url_for('recommendations.regenerate') }}" class="inline-block px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold">Generate Now</a>
+      {% endif %}
+    </div>
+  {% else %}
+
+  <!-- Header -->
+  <div class="mb-10 animate-fade-in">
+    <p class="text-brand-400 text-sm font-semibold uppercase tracking-wider mb-2">Your Personalized Path</p>
+    <h1 class="font-display text-4xl font-extrabold text-white">Career Recommendations</h1>
+    <p class="text-gray-400 mt-2">Based on your marks, aptitude quiz, interests, and location constraints.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+    <!-- Left: Stream + Top Courses -->
+    <div class="lg:col-span-2 space-y-6">
+
+      <!-- Stream Card -->
+      <div class="rec-card p-6 rounded-2xl bg-gradient-to-br from-brand-900/40 to-brand-800/20 border border-brand-700/40 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <p class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Recommended Stream</p>
+            <h2 class="font-display text-3xl font-extrabold text-white mt-1">{{ recommendation.recommended_stream }}</h2>
+          </div>
+          <div class="text-right">
+            <p class="text-xs text-gray-500 mb-1">Confidence</p>
+            <div class="w-16 h-16 rounded-full flex items-center justify-center border-4 border-brand-500 bg-brand-950">
+              <span class="font-bold text-brand-300 text-sm">{{ (recommendation.stream_confidence * 100) | round(0) | int }}%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-brand-500 to-brand-400 rounded-full transition-all duration-1000 confidence-bar" data-width="{{ (recommendation.stream_confidence * 100) | round(0) | int }}" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Top Courses -->
+      <div>
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <span class="text-saffron-400">📚</span> Top Course Recommendations
+        </h3>
+        <div class="space-y-3">
+          {% for course in recommendation.top_courses %}
+            <div class="course-card group p-5 rounded-2xl bg-gray-900/60 border border-gray-700/50 hover:border-brand-600/50 hover:bg-gray-800/60 transition-all duration-300 cursor-pointer" 
+                 onclick="window.location.href='{{ url_for('recommendations.career_detail', course_name=course.label) }}'"
+                 data-course="{{ course.label }}">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center font-display font-bold text-sm
+                    {% if loop.index == 1 %}bg-yellow-500/20 text-yellow-400 border border-yellow-600/30
+                    {% elif loop.index == 2 %}bg-gray-400/20 text-gray-300 border border-gray-600/30
+                    {% elif loop.index == 3 %}bg-orange-500/20 text-orange-400 border border-orange-600/30
+                    {% else %}bg-gray-700/40 text-gray-400 border border-gray-600/20{% endif %}">
+                    #{{ course.rank }}
+                  </div>
+                  <div>
+                    <p class="font-semibold text-white text-sm">{{ course.label }}</p>
+                    {% if course.rule_flag is defined %}<span class="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded-full">{{ course.rule_flag | replace('_', ' ') | title }}</span>{% endif %}
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <p class="text-xs text-gray-500">Match</p>
+                    <p class="text-sm font-bold text-brand-400">{{ (course.confidence * 100) | round(1) }}%</p>
+                  </div>
+                  <a href="{{ url_for('recommendations.career_detail', course_name=course.label) }}"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-600 text-white hover:bg-brand-500 transition-colors duration-200">
+                    Explore →
+                  </a>
+                </div>
+              </div>
+              <div class="mt-3 bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-full" style="width: {{ (course.confidence * 100) | round(1) }}%"></div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Career Clusters -->
+      <div>
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <span class="text-emerald-400">🚀</span> Career Clusters for You
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {% for career in recommendation.career_clusters %}
+            <div class="p-4 rounded-xl bg-gray-900/60 border border-gray-700/40 hover:border-emerald-700/40 transition-all duration-300">
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-white">{{ career.label }}</p>
+                <span class="text-xs text-emerald-400 font-semibold">{{ (career.confidence * 100) | round(0) | int }}%</span>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Recommended Colleges -->
+      <div class="mt-8">
+        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+          <span class="text-brand-400">🏢</span> Recommended Colleges for You
+        </h3>
+        {% if recommended_colleges %}
+          <div class="space-y-3">
+            {% for item in recommended_colleges %}
+              {% set col = item.college %}
+              <div class="p-5 rounded-2xl bg-gray-900/60 border border-gray-700/50 hover:border-brand-600/50 hover:bg-gray-800/60 transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h4 class="font-bold text-white text-sm">{{ col.name }}</h4>
+                    <span class="px-2 py-0.5 rounded text-[10px] uppercase font-semibold bg-gray-800 text-gray-400 border border-gray-700 capitalize">
+                      {{ col.college_type }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+                    <span>📍</span> {{ col.district }}, {{ col.state }}
+                    {% if item.distance is not none %}
+                      <span class="text-gray-600">•</span> <span class="text-brand-400 font-medium">{{ item.distance | round(1) }} km away</span>
+                    {% endif %}
+                  </p>
+                  <p class="text-xs text-gray-500 mt-2">
+                    Offers matching course: 
+                    <span class="text-emerald-400 font-medium">{{ item.matching_courses | join(', ') }}</span>
+                  </p>
+                </div>
+                
+                <div class="flex items-center gap-3 self-end sm:self-auto">
+                  <div class="text-right hidden sm:block">
+                    <p class="text-xs text-gray-500">Est. Fees/Yr</p>
+                    <p class="text-xs font-bold text-white">
+                      {% if col.annual_fees_min %}
+                        ₹{{ '{:,.0f}'.format(col.annual_fees_min) }} - ₹{{ '{:,.0f}'.format(col.annual_fees_max) if col.annual_fees_max else 'N/A' }}
+                      {% else %}
+                        N/A
+                      {% endif %}
+                    </p>
+                  </div>
+                  <a href="{{ url_for('colleges.detail', college_id=col.id) }}" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow transition-colors">
+                    Details →
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-6 rounded-2xl bg-gray-900/30 border border-gray-800/40 text-center text-gray-500 text-xs">
+            No matching colleges found matching your recommended courses, location, and budget constraints.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Right: Scholarships + Explanation + Actions -->
+    <div class="space-y-6">
+
+      <!-- Explanation -->
+      <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-700/40">
+        <h3 class="font-semibold text-white mb-4 flex items-center gap-2"><span>🔍</span> Why This Recommendation?</h3>
+        {% if recommendation.explanations %}
+          {% if recommendation.explanations.fallback %}
+            <p class="text-xs text-amber-400 mb-3 bg-amber-900/20 px-3 py-2 rounded-lg">Rule-based: ML model not yet trained. Run <code class="text-amber-300">python scripts/train_model.py</code></p>
+          {% endif %}
+          {% if recommendation.explanations.top_factors %}
+            <div class="space-y-2">
+              {% for factor in recommendation.explanations.top_factors[:5] %}
+                <div>
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-gray-400">{{ factor.feature | replace('_', ' ') | title }}</span>
+                    <span class="text-brand-400">{{ (factor.importance * 100) | round(1) }}%</span>
+                  </div>
+                  <div class="bg-gray-800 rounded-full h-1"><div class="h-full bg-brand-500 rounded-full" style="width: {{ [factor.importance * 100 * 5, 100] | min }}%"></div></div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if recommendation.explanations.marks_aggregate %}
+            <p class="text-xs text-gray-500 mt-3">Aggregate: <span class="text-white font-semibold">{{ recommendation.explanations.marks_aggregate }}%</span></p>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- Scholarships -->
+      {% if recommendation.scholarship_matches %}
+        <div class="p-6 rounded-2xl bg-gray-900/60 border border-gray-700/40">
+          <h3 class="font-semibold text-white mb-4 flex items-center gap-2"><span>💰</span> Matched Scholarships</h3>
+          <div class="space-y-3">
+            {% for s in recommendation.scholarship_matches[:4] %}
+              <div class="p-3 rounded-xl {% if s.eligible %}bg-emerald-900/20 border border-emerald-800/30{% else %}bg-gray-800/40 border border-gray-700/30{% endif %}">
+                <p class="text-xs font-semibold {% if s.eligible %}text-emerald-300{% else %}text-gray-400{% endif %}">{{ s.name }}</p>
+                <div class="flex items-center justify-between mt-1">
+                  <p class="text-xs text-gray-500">{{ s.amount }}</p>
+                  {% if s.deadline %}<p class="text-xs text-amber-400">Due: {{ s.deadline[:10] }}</p>{% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <a href="{{ url_for('colleges.map_view') }}" class="block w-full py-3 px-5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-sm text-center transition-colors duration-200">
+          🗺️ Find Nearby Colleges
+        </a>
+        <button id="regen-btn" onclick="regenerate()" class="w-full py-3 px-5 rounded-xl border border-gray-700 hover:border-gray-600 text-gray-300 font-semibold text-sm transition-colors duration-200">
+          🔄 Regenerate Recommendations
+        </button>
+      </div>
+
+      <!-- Generated at -->
+      <p class="text-xs text-gray-600 text-center">Generated {{ recommendation.created_at.strftime('%d %b %Y at %I:%M %p') }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Animate confidence bar
+document.querySelectorAll('.confidence-bar').forEach(bar => {
+  const width = bar.dataset.width;
+  setTimeout(() => { bar.style.width = width + '%'; }, 500);
+});
+
+// GSAP entrance
+gsap.from('.rec-card', { y: 30, opacity: 0, duration: 0.7, ease: 'power2.out', delay: 0.2 });
+gsap.from('.course-card', { y: 20, opacity: 0, duration: 0.5, stagger: 0.1, delay: 0.4 });
+
+async function regenerate() {
+  const btn = document.getElementById('regen-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generating...';
+  try {
+    const resp = await fetch('/recommendations/api/regenerate', { method: 'POST' });
+    if (resp.ok) window.location.reload();
+    else btn.textContent = '❌ Error — try again';
+  } catch { btn.textContent = '❌ Error — try again'; }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Career & Education Advisor{% endblock %}
+
+{% block content %}
+<!-- ── Hero Section ──────────────────────────────────────────────────────────── -->
+<section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <!-- Animated gradient background -->
+  <div class="absolute inset-0 bg-gradient-to-br from-gray-950 via-blue-950/30 to-gray-950"></div>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(37,99,235,0.15)_0%,_transparent_50%),radial-gradient(ellipse_at_bottom_right,_rgba(249,115,22,0.1)_0%,_transparent_50%)]"></div>
+
+  <!-- Floating orbs -->
+  <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-brand-600/10 rounded-full blur-3xl animate-pulse-slow"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-saffron-500/5 rounded-full blur-3xl animate-pulse-slow" style="animation-delay:2s"></div>
+
+  <!-- Grid pattern overlay -->
+  <div class="absolute inset-0 opacity-5" style="background-image: linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px); background-size: 64px 64px;"></div>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 py-24 text-center">
+    <!-- Badge -->
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-800 bg-brand-950/50 text-brand-400 text-sm font-medium mb-8 backdrop-blur-sm" id="hero-badge">
+      <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+      AI-Powered • Multilingual • Free for All Students
+    </div>
+
+    <!-- Headline -->
+    <h1 class="font-display text-5xl sm:text-6xl md:text-7xl font-extrabold text-white leading-tight mb-6" id="hero-title">
+      Your Future,<br />
+      <span class="bg-gradient-to-r from-brand-400 via-blue-400 to-saffron-400 bg-clip-text text-transparent">Clearly Mapped.</span>
+    </h1>
+
+    <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed" id="hero-desc">
+      Free AI career counseling for Class 10 & 12 students. Get personalized stream recommendations, nearby college discovery, scholarship alerts, and a clear career roadmap — in your language.
+    </p>
+
+    <!-- CTA buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16" id="hero-cta">
+      <a href="{{ url_for('auth.register') }}" class="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-lg shadow-2xl shadow-brand-900/50 hover:shadow-brand-800/70 transition-all duration-300 hover:scale-105 hover:from-brand-500 hover:to-brand-400">
+        Start My Journey
+        <span class="ml-2 group-hover:translate-x-1 inline-block transition-transform duration-200">→</span>
+      </a>
+      <a href="{{ url_for('auth.login') }}" class="px-8 py-4 rounded-2xl border border-gray-700 text-gray-300 font-semibold text-lg hover:border-gray-500 hover:text-white hover:bg-gray-800/50 transition-all duration-300">
+        Already a member? Login
+      </a>
+    </div>
+
+    <!-- Impact counters -->
+    <div class="grid grid-cols-3 gap-8 max-w-lg mx-auto" id="counters">
+      <div class="text-center">
+        <div class="font-display text-3xl font-extrabold text-white counter" data-target="12847">0</div>
+        <div class="text-xs text-gray-500 mt-1">Students Guided</div>
+      </div>
+      <div class="text-center">
+        <div class="font-display text-3xl font-extrabold text-white counter" data-target="480">0</div>
+        <div class="text-xs text-gray-500 mt-1">Colleges Listed</div>
+      </div>
+      <div class="text-center">
+        <div class="font-display text-3xl font-extrabold text-white counter" data-target="38">0</div>
+        <div class="text-xs text-gray-500 mt-1">Districts Covered</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-gray-600 text-xs animate-bounce">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+  </div>
+</section>
+
+<!-- ── Who Is This For ────────────────────────────────────────────────────── -->
+<section class="py-24 bg-gray-950">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-16 scroll-animate">
+      <h2 class="font-display text-4xl font-bold text-white mb-4">Built for Every Student</h2>
+      <p class="text-gray-400 max-w-2xl mx-auto">Whether you're in a village school or a city college, your future deserves clarity.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% set personas = [
+        ('🧑‍🎓', 'Class 10 Students', 'Unsure which stream to pick? Our AI analyzes your marks, aptitude, and interests to suggest the right path.', 'from-blue-600/20 to-blue-800/10', 'border-blue-800/50'),
+        ('👩‍👧', 'Parents & Families', 'Understand why higher education matters, what it costs, and which scholarships your child qualifies for — in simple language.', 'from-saffron-600/20 to-orange-800/10', 'border-saffron-800/50'),
+        ('🏛️', 'Class 12 Students', 'Get ranked recommendations for degrees, engineering colleges, diploma courses, and career paths with salary projections.', 'from-emerald-600/20 to-green-800/10', 'border-emerald-800/50'),
+      ] %}
+      {% for icon, title, desc, gradient, border in personas %}
+        <div class="scroll-animate group relative p-8 rounded-2xl bg-gradient-to-br {{ gradient }} border {{ border }} hover:scale-105 transition-all duration-300 cursor-pointer">
+          <div class="text-4xl mb-4">{{ icon }}</div>
+          <h3 class="text-xl font-semibold text-white mb-3">{{ title }}</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">{{ desc }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ───────────────────────────────────────────────────────── -->
+<section class="py-24 bg-gradient-to-b from-gray-950 to-gray-900">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-16 scroll-animate">
+      <h2 class="font-display text-4xl font-bold text-white mb-4">Four Steps to Clarity</h2>
+      <p class="text-gray-400">No guesswork. No confusion. Just a clear path forward.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+      {% set steps = [
+        ('01', '📝', 'Build Your Profile', 'Tell us your class, marks, location, and interests in 5 minutes.'),
+        ('02', '🧠', 'Take the Aptitude Quiz', '56-question assessment across 6 domains. Free. Takes 15 minutes.'),
+        ('03', '🤖', 'Get AI Recommendations', 'Our ensemble ML model ranks your top 5 streams, courses, and careers.'),
+        ('04', '🗺️', 'Explore & Apply', 'Find nearby colleges on the map, track scholarships, set deadline reminders.'),
+      ] %}
+      {% for num, icon, title, desc in steps %}
+        <div class="scroll-animate relative">
+          <div class="relative p-6 rounded-2xl bg-gray-800/50 border border-gray-700/50 hover:border-brand-700/50 transition-all duration-300 group hover:bg-gray-800/80 h-full">
+            <div class="flex items-start gap-3 mb-4">
+              <span class="text-3xl">{{ icon }}</span>
+              <span class="text-5xl font-display font-extrabold text-gray-800 group-hover:text-gray-700 transition-colors absolute top-4 right-6">{{ num }}</span>
+            </div>
+            <h3 class="text-lg font-semibold text-white mb-2">{{ title }}</h3>
+            <p class="text-gray-400 text-sm">{{ desc }}</p>
+          </div>
+          {% if not loop.last %}
+            <div class="hidden md:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-gray-700 to-transparent z-10"></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── Feature Highlights ─────────────────────────────────────────────────── -->
+<section class="py-24 bg-gray-900">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="text-center mb-16 scroll-animate">
+      <h2 class="font-display text-4xl font-bold text-white mb-4">Everything You Need</h2>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% set features = [
+        ('🎯', 'Personalized Recommendations', 'Stream, degree, and career suggestions calibrated to YOUR profile — not generic advice.'),
+        ('🗺️', 'College Map Explorer', 'Find government & private colleges near you with fees, cutoffs, and hostel info.'),
+        ('💰', 'Scholarship Matcher', 'Automatically matched to scholarships you qualify for, with deadline alerts.'),
+        ('📊', 'Career Roadmap', 'Visual path: Stream → Degree → Jobs → Exams → Higher Studies → Salary outlook.'),
+        ('🔔', 'Smart Reminders', 'Never miss an admission deadline, counseling date, or scholarship window.'),
+        ('🌐', 'Multilingual', 'Available in English, Tamil, and Hindi. More languages coming soon.'),
+      ] %}
+      {% for icon, title, desc in features %}
+        <div class="scroll-animate p-6 rounded-2xl bg-gray-800/40 border border-gray-700/40 hover:border-brand-700/40 hover:bg-gray-800/60 transition-all duration-300 group">
+          <div class="w-12 h-12 rounded-xl bg-brand-900/50 border border-brand-800/50 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-200">{{ icon }}</div>
+          <h3 class="text-base font-semibold text-white mb-2">{{ title }}</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">{{ desc }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Banner ─────────────────────────────────────────────────────────── -->
+<section class="py-24 bg-gray-950">
+  <div class="max-w-4xl mx-auto px-4 text-center scroll-animate">
+    <div class="relative p-12 rounded-3xl bg-gradient-to-br from-brand-900/50 to-saffron-900/20 border border-brand-800/30 overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(37,99,235,0.1)_0%,_transparent_70%)]"></div>
+      <div class="relative z-10">
+        <h2 class="font-display text-4xl font-extrabold text-white mb-4">Your Future Starts Today</h2>
+        <p class="text-gray-400 text-lg mb-8">Free for all students. No registration fees. Just answers.</p>
+        <a href="{{ url_for('auth.register') }}" class="inline-block px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-600 to-saffron-500 text-white font-bold text-lg shadow-2xl hover:scale-105 transition-all duration-300">
+          Create Free Account →
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero entrance animations
+gsap.timeline({ delay: 0.3 })
+  .from('#hero-badge', { y: -20, opacity: 0, duration: 0.5 })
+  .from('#hero-title', { y: 40, opacity: 0, duration: 0.8, ease: 'power3.out' }, '-=0.2')
+  .from('#hero-desc', { y: 30, opacity: 0, duration: 0.6, ease: 'power2.out' }, '-=0.4')
+  .from('#hero-cta', { y: 20, opacity: 0, duration: 0.5 }, '-=0.3')
+  .from('#counters > div', { y: 20, opacity: 0, stagger: 0.15, duration: 0.5 }, '-=0.2');
+
+// Scroll-triggered animations
+gsap.utils.toArray('.scroll-animate').forEach(el => {
+  gsap.from(el, {
+    scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'play none none none' },
+    y: 40, opacity: 0, duration: 0.7, ease: 'power2.out',
+  });
+});
+
+// Counter animation
+function animateCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    let current = 0;
+    const step = Math.ceil(target / 80);
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current.toLocaleString('en-IN');
+      if (current >= target) clearInterval(timer);
+    }, 20);
+  });
+}
+
+// Trigger counters when in view
+ScrollTrigger.create({
+  trigger: '#counters',
+  start: 'top 80%',
+  onEnter: animateCounters,
+  once: true,
+});
+</script>
+{% endblock %}

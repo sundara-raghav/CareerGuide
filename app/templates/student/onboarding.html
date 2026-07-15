@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+{% block title %}Build Your Profile — Step {{ step }}{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+  <!-- Progress header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between mb-3">
+      {% for s in range(1, 5) %}
+        <div class="flex items-center {% if not loop.last %}flex-1{% endif %}">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300
+            {% if s < step %}bg-emerald-500 text-white
+            {% elif s == step %}bg-brand-500 text-white ring-4 ring-brand-500/30
+            {% else %}bg-gray-800 text-gray-500 border border-gray-700{% endif %}">
+            {% if s < step %}✓{% else %}{{ s }}{% endif %}
+          </div>
+          {% if not loop.last %}
+            <div class="flex-1 h-0.5 mx-2 {% if s < step %}bg-emerald-500{% else %}bg-gray-800{% endif %} transition-all duration-500"></div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    <div class="flex justify-between text-xs text-gray-600">
+      <span>Academic Info</span><span>Marks</span><span>Location</span><span>Preferences</span>
+    </div>
+  </div>
+
+  <div class="bg-gray-900/80 border border-gray-800 rounded-3xl p-8 shadow-2xl">
+    <h1 class="font-display text-2xl font-bold text-white mb-1">
+      {% if step == 1 %}Academic Information
+      {% elif step == 2 %}Your Marks
+      {% elif step == 3 %}Your Location
+      {% elif step == 4 %}Interests & Constraints
+      {% endif %}
+    </h1>
+    <p class="text-gray-400 text-sm mb-8">
+      {% if step == 1 %}Tell us about your current studies.
+      {% elif step == 2 %}Enter your subject-wise marks (approximate is fine).
+      {% elif step == 3 %}We'll find colleges near you.
+      {% elif step == 4 %}Help us understand your goals and budget.
+      {% endif %}
+    </p>
+
+    <form method="POST" action="{{ url_for('student.onboarding') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token is defined else '' }}" />
+      <input type="hidden" name="step" value="{{ step }}" />
+
+      {% if step == 1 %}
+        <div class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label-text">Current Class</label>
+              <select name="student_class" required class="input-field">
+                <option value="">Select class</option>
+                <option value="10" {% if student.student_class == 10 %}selected{% endif %}>Class 10</option>
+                <option value="12" {% if student.student_class == 12 %}selected{% endif %}>Class 12</option>
+              </select>
+            </div>
+            <div>
+              <label class="label-text">Board</label>
+              <select name="board" required class="input-field">
+                <option value="">Select board</option>
+                {% for b in ['CBSE', 'State Board', 'ICSE', 'Matriculation'] %}
+                  <option value="{{ b }}" {% if student.board == b %}selected{% endif %}>{{ b }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="label-text">School Name (optional)</label>
+            <input type="text" name="school_name" value="{{ student.school_name or '' }}" placeholder="Your school name" class="input-field" />
+          </div>
+          <div>
+            <label class="label-text">School Type</label>
+            <div class="grid grid-cols-3 gap-3">
+              {% for val, label in [('government', '🏛️ Government'), ('aided', '📚 Aided'), ('private', '🏢 Private')] %}
+                <label class="flex items-center gap-2 p-3 rounded-xl border border-gray-700 cursor-pointer hover:border-brand-600/50 text-sm text-gray-300">
+                  <input type="radio" name="school_type" value="{{ val }}" {% if student.school_type == val or (not student.school_type and val == 'government') %}checked{% endif %} class="accent-brand-500" />
+                  {{ label }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+      {% elif step == 2 %}
+        <div class="space-y-4">
+          <p class="text-xs text-amber-400 bg-amber-900/20 px-3 py-2 rounded-lg">Enter marks out of 100. Leave blank if subject is not applicable.</p>
+          {% set subjects_10 = [('mark_math', 'Mathematics'), ('mark_science', 'Science'), ('mark_social', 'Social Science'), ('mark_english', 'English'), ('mark_regional_language', 'Regional Language')] %}
+          {% set subjects_12 = [('mark_english', 'English'), ('mark_core_subject_1', 'Core Subject 1'), ('mark_core_subject_2', 'Core Subject 2'), ('mark_elective_1', 'Elective 1'), ('mark_elective_2', 'Elective 2')] %}
+          {% set subjects = subjects_12 if student.student_class == 12 else subjects_10 %}
+          {% for field, label in subjects %}
+            <div class="flex items-center gap-4">
+              <label class="w-48 text-sm text-gray-400 flex-shrink-0">{{ label }}</label>
+              <input type="number" name="{{ field }}" min="0" max="100" step="0.1"
+                value="{{ student.marks.get(field.replace('mark_', ''), '') if student.marks else '' }}"
+                placeholder="0–100" class="input-field flex-1" />
+            </div>
+          {% endfor %}
+        </div>
+
+      {% elif step == 3 %}
+        <div class="space-y-5">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label-text">District</label>
+              <input type="text" name="district" value="{{ student.district or '' }}" required placeholder="e.g. Coimbatore" class="input-field" />
+            </div>
+            <div>
+              <label class="label-text">State</label>
+              <input type="text" name="state" value="{{ student.state or 'Tamil Nadu' }}" required placeholder="Tamil Nadu" class="input-field" />
+            </div>
+          </div>
+          <div>
+            <label class="label-text">Pincode (optional)</label>
+            <input type="text" name="pincode" value="{{ student.pincode or '' }}" placeholder="641001" class="input-field" />
+          </div>
+          <div>
+            <label class="label-text">Travel Radius: <span id="radius-val">{{ student.travel_radius_km | int or 50 }}</span> km</label>
+            <input type="range" name="travel_radius_km" min="10" max="150" step="10"
+              value="{{ student.travel_radius_km | int or 50 }}"
+              oninput="document.getElementById('radius-val').textContent = this.value"
+              class="w-full accent-brand-500 mt-2" />
+            <div class="flex justify-between text-xs text-gray-600 mt-1"><span>10 km</span><span>150 km</span></div>
+          </div>
+        </div>
+
+      {% elif step == 4 %}
+        <div class="space-y-6">
+          <div>
+            <label class="label-text mb-3">Interests (select all that apply)</label>
+            <div class="grid grid-cols-2 gap-2">
+              {% for interest in ['mathematics', 'biology', 'computers', 'sports', 'arts', 'music', 'social_service', 'business', 'nature', 'writing', 'electronics', 'farming', 'healthcare', 'teaching'] %}
+                <label class="flex items-center gap-2 p-2 rounded-lg border border-gray-700 hover:border-brand-600/50 cursor-pointer text-sm text-gray-300">
+                  <input type="checkbox" name="interests" value="{{ interest }}"
+                    {% if interest in (student.interests or []) %}checked{% endif %}
+                    class="accent-brand-500 rounded" />
+                  {{ interest | replace('_', ' ') | title }}
+                </label>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="label-text">Annual Family Income (₹)</label>
+              <input type="number" name="annual_family_income" value="{{ student.annual_family_income or '' }}" placeholder="e.g. 200000" class="input-field" />
+            </div>
+            <div>
+              <label class="label-text">Education Budget/Year (₹)</label>
+              <input type="number" name="budget_for_education" value="{{ student.budget_for_education or '' }}" placeholder="e.g. 50000" class="input-field" />
+            </div>
+          </div>
+          <div class="flex gap-6">
+            <label class="flex items-center gap-2 text-sm text-gray-300">
+              <input type="checkbox" name="needs_hostel" {% if student.needs_hostel %}checked{% endif %} class="accent-brand-500 rounded" />
+              Need Hostel
+            </label>
+            <label class="flex items-center gap-2 text-sm text-gray-300">
+              <input type="checkbox" name="needs_scholarship" {% if student.needs_scholarship %}checked{% endif %} class="accent-brand-500 rounded" />
+              Need Scholarship
+            </label>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="flex justify-between mt-8">
+        {% if step > 1 %}
+          <a href="{{ url_for('student.onboarding', step=step-1) }}" class="px-6 py-3 rounded-xl border border-gray-700 text-gray-400 hover:border-gray-600 hover:text-white text-sm transition-all">← Back</a>
+        {% else %}
+          <div></div>
+        {% endif %}
+        <button type="submit" class="px-8 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-500 text-white font-bold text-sm hover:scale-105 transition-all duration-300 shadow-lg shadow-brand-900/40">
+          {% if step < 4 %}Continue →{% else %}Complete Profile 🎉{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.label-text { @apply block text-sm font-medium text-gray-300 mb-2; }
+.input-field { @apply w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition text-sm; }
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+gsap.from('.bg-gray-900\\/80', { y: 30, opacity: 0, duration: 0.6, ease: 'power2.out', delay: 0.1 });
+</script>
+{% endblock %}

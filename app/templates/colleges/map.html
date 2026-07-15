@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block title %}College Map Explorer{% endblock %}
+{% block meta_description %}Explore government & private colleges near you on an interactive map powered by OpenFreeMap.{% endblock %}
+
+{% block extra_head %}
+<!-- MapLibre GL JS — free, no API key needed -->
+<link href="https://unpkg.com/maplibre-gl/dist/maplibre-gl.css" rel="stylesheet" />
+<script src="https://unpkg.com/maplibre-gl/dist/maplibre-gl.js"></script>
+<style>
+  #map { height: 70vh; border-radius: 1rem; }
+  .maplibregl-popup-content {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    min-width: 220px;
+  }
+  .maplibregl-popup-tip { border-top-color: #334155 !important; }
+  .maplibregl-ctrl-group { background: #1e293b !important; border: 1px solid #334155 !important; }
+  .maplibregl-ctrl button { background-color: #1e293b !important; }
+  .maplibregl-ctrl button span { filter: invert(1); }
+  .popup-name { font-weight: 700; font-size: 0.875rem; color: #f1f5f9; margin-bottom: 2px; }
+  .popup-loc  { font-size: 0.75rem; color: #94a3b8; margin-bottom: 8px; }
+  .popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+  .popup-tag  { font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; }
+  .popup-link { font-size: 0.75rem; color: #60a5fa; font-weight: 600; text-decoration: none; }
+  .popup-link:hover { text-decoration: underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+  <div class="mb-6">
+    <h1 class="font-display text-3xl font-bold text-white">College Explorer</h1>
+    <p class="text-gray-400 mt-1">Find government &amp; private colleges near you with real-time filters.</p>
+  </div>
+
+  <!-- Filters bar -->
+  <div class="flex flex-wrap gap-3 mb-6 p-4 bg-gray-900/80 border border-gray-800 rounded-2xl">
+    <select id="filter-type" onchange="applyFilters()" class="bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+      <option value="">All Types</option>
+      <option value="government">Government</option>
+      <option value="private">Private</option>
+      <option value="aided">Aided</option>
+    </select>
+    <select id="filter-hostel" onchange="applyFilters()" class="bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-brand-500 focus:outline-none">
+      <option value="">Hostel: Any</option>
+      <option value="true">Hostel Available</option>
+    </select>
+    <input type="number" id="filter-fees" placeholder="Max Fees (₹)" onchange="applyFilters()"
+      class="bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-gray-600" />
+    <input type="text" id="filter-district" placeholder="District..." onkeyup="applyFilters()"
+      class="bg-gray-800 border border-gray-700 text-gray-300 rounded-xl px-3 py-2 text-sm w-40 focus:ring-2 focus:ring-brand-500 focus:outline-none placeholder-gray-600" />
+    <div class="flex-1 text-right">
+      <span id="results-count" class="text-sm text-gray-500">{{ colleges | length }} colleges shown</span>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Map -->
+    <div class="lg:col-span-2">
+      <div id="map" class="border border-gray-800 shadow-2xl"></div>
+    </div>
+
+    <!-- College list -->
+    <div class="overflow-y-auto max-h-[70vh] space-y-3 pr-1" id="college-list">
+      {% for c in colleges %}
+        <div class="college-item p-4 rounded-xl bg-gray-900/60 border border-gray-700/50 hover:border-brand-600/40 transition-all duration-300 cursor-pointer group"
+             data-id="{{ c.id }}" onclick="focusCollege({{ c.id }})">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <p class="font-semibold text-white text-sm group-hover:text-brand-300 transition-colors">{{ c.name }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ c.district }}, {{ c.state }}</p>
+            </div>
+            <span class="ml-2 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0
+              {% if c.college_type == 'government' %}bg-emerald-900/40 text-emerald-400 border border-emerald-800/40
+              {% elif c.college_type == 'private' %}bg-blue-900/40 text-blue-400 border border-blue-800/40
+              {% else %}bg-amber-900/40 text-amber-400 border border-amber-800/40{% endif %}">
+              {{ c.college_type | capitalize }}
+            </span>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            {% if c.has_hostel %}<span class="text-emerald-400">🏠 Hostel</span>{% endif %}
+            {% if c.annual_fees_min %}<span class="text-gray-400">₹{{ '{:,.0f}'.format(c.annual_fees_min) }}/yr</span>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="text-center text-gray-500 py-12">
+          <p class="text-4xl mb-3">🏫</p>
+          <p class="text-sm">No colleges found in your area yet.</p>
+          <p class="text-xs mt-1 text-gray-600">Seed the database to populate colleges.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const COLLEGES = {{ colleges | tojson }};
+const CENTER   = [{{ center_lng }}, {{ center_lat }}];  // MapLibre uses [lng, lat]
+const RADIUS_M = {{ radius }} * 1000;
+
+// ── Colour helpers ─────────────────────────────────────────────────────────
+const TYPE_COLOR = {
+  government: '#10b981',
+  private:    '#3b82f6',
+  aided:      '#f59e0b',
+};
+function typeColor(t) { return TYPE_COLOR[t] || '#9ca3af'; }
+
+// ── Init map ───────────────────────────────────────────────────────────────
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://tiles.openfreemap.org/styles/dark',   // free, no key
+  center: CENTER,
+  zoom: 10,
+  attributionControl: true,
+});
+
+map.addControl(new maplibregl.NavigationControl(), 'top-right');
+map.addControl(new maplibregl.FullscreenControl(), 'top-right');
+
+let markersMap = {};   // college.id → {marker, popup}
+let activePopup = null;
+
+map.on('load', () => {
+  // ── Radius circle (using turf-free approach via GeoJSON circle) ──────────
+  const circleGeo = createCircle(CENTER, RADIUS_M, 64);
+  map.addSource('radius-source', { type: 'geojson', data: circleGeo });
+  map.addLayer({
+    id: 'radius-fill',
+    type: 'fill',
+    source: 'radius-source',
+    paint: { 'fill-color': '#3b82f6', 'fill-opacity': 0.06 },
+  });
+  map.addLayer({
+    id: 'radius-line',
+    type: 'line',
+    source: 'radius-source',
+    paint: { 'line-color': '#3b82f6', 'line-opacity': 0.3, 'line-width': 1.5 },
+  });
+
+  // ── Student location pin ─────────────────────────────────────────────────
+  const youEl = document.createElement('div');
+  youEl.style.cssText = `
+    width:18px; height:18px; border-radius:50%;
+    background:#f97316; border:3px solid #fff;
+    box-shadow:0 0 0 4px rgba(249,115,22,0.3);
+  `;
+  new maplibregl.Marker({ element: youEl })
+    .setLngLat(CENTER)
+    .setPopup(new maplibregl.Popup({ offset: 12 }).setHTML('<div style="color:#1e293b;font-weight:700;font-size:0.8rem">📍 Your Location</div>'))
+    .addTo(map);
+
+  // ── College pins ────────────────────────────────────────────────────────
+  COLLEGES.forEach(addPin);
+});
+
+// ── Build GeoJSON circle polygon ───────────────────────────────────────────
+function createCircle(center, radiusM, steps) {
+  const coords = [];
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * 2 * Math.PI;
+    const dx = (radiusM / 111320) * Math.cos(angle);
+    const dy = (radiusM / (111320 * Math.cos(center[1] * Math.PI / 180))) * Math.sin(angle);
+    coords.push([center[0] + dy, center[1] + dx]);
+  }
+  return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
+}
+
+// ── Add a single college pin ───────────────────────────────────────────────
+function addPin(college) {
+  if (!college.latitude || !college.longitude) return;
+
+  const color = typeColor(college.college_type);
+  const el = document.createElement('div');
+  el.style.cssText = `
+    width:14px; height:14px; border-radius:50%;
+    background:${color}; border:2px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.5);
+    cursor:pointer; transition:transform 0.15s;
+  `;
+  el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.5)');
+  el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+
+  const fees = college.annual_fees_min
+    ? `₹${Number(college.annual_fees_min).toLocaleString('en-IN')}/yr`
+    : 'Fees N/A';
+  const hostelTag = college.has_hostel
+    ? `<span class="popup-tag" style="background:#064e3b;color:#6ee7b7">🏠 Hostel</span>` : '';
+
+  const popup = new maplibregl.Popup({ offset: 14, maxWidth: '260px' }).setHTML(`
+    <div>
+      <p class="popup-name">${college.name}</p>
+      <p class="popup-loc">${college.district}, ${college.state}</p>
+      <div class="popup-tags">
+        <span class="popup-tag" style="background:#1e3a5f;color:#93c5fd">${college.college_type}</span>
+        <span class="popup-tag" style="background:#1a2e1a;color:#86efac">${fees}</span>
+        ${hostelTag}
+      </div>
+      <a href="/colleges/${college.id}" class="popup-link">View Details →</a>
+    </div>
+  `);
+
+  const marker = new maplibregl.Marker({ element: el })
+    .setLngLat([college.longitude, college.latitude])
+    .setPopup(popup)
+    .addTo(map);
+
+  markersMap[college.id] = { marker, popup };
+}
+
+// ── Focus a college from sidebar click ────────────────────────────────────
+function focusCollege(id) {
+  const entry = markersMap[id];
+  if (!entry) return;
+  if (activePopup) activePopup.remove();
+  map.flyTo({ center: entry.marker.getLngLat(), zoom: 13, duration: 800 });
+  entry.marker.togglePopup();
+  activePopup = entry.popup;
+}
+
+// ── Filter handler ─────────────────────────────────────────────────────────
+async function applyFilters() {
+  const type     = document.getElementById('filter-type').value;
+  const hostel   = document.getElementById('filter-hostel').value;
+  const fees     = document.getElementById('filter-fees').value;
+  const district = document.getElementById('filter-district').value;
+
+  const params = new URLSearchParams({ lat: CENTER[1], lng: CENTER[0], radius: {{ radius }} });
+  if (type)     params.set('type', type);
+  if (hostel)   params.set('hostel', hostel);
+  if (fees)     params.set('max_fees', fees);
+  if (district) params.set('district', district);
+
+  const resp = await fetch('/colleges/api/search?' + params);
+  const data = await resp.json();
+
+  // Remove old markers
+  Object.values(markersMap).forEach(e => e.marker.remove());
+  markersMap = {};
+  data.colleges.forEach(addPin);
+  document.getElementById('results-count').textContent = `${data.count} colleges shown`;
+}
+</script>
+{% endblock %}

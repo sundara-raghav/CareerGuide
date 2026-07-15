@@ -1,0 +1,57 @@
+# ─── Web Framework ────────────────────────────────────────────────────────────
+Flask==3.0.3
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+Flask-Limiter==3.7.0
+Flask-SQLAlchemy==3.1.1
+Flask-Migrate==4.0.7
+Flask-CORS==4.0.1
+Flask-Mail==0.10.0
+Werkzeug==3.0.3
+gunicorn==22.0.0
+
+# ─── Database ─────────────────────────────────────────────────────────────────
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+supabase==2.5.3
+alembic==1.13.2
+
+# ─── ML / Data Science ────────────────────────────────────────────────────────
+scikit-learn==1.5.1
+xgboost==2.0.3
+numpy==1.26.4
+pandas==2.2.2
+joblib==1.4.2
+shap==0.45.1
+imbalanced-learn==0.12.3
+
+# ─── Task Queue / Scheduling ──────────────────────────────────────────────────
+celery==5.4.0
+redis==5.0.7
+APScheduler==3.10.4
+
+# ─── Notifications ────────────────────────────────────────────────────────────
+twilio==9.2.3
+sendgrid==6.11.0
+httpx==0.27.0
+
+# ─── Validation / Serialization ───────────────────────────────────────────────
+pydantic==2.8.2
+marshmallow==3.21.3
+email-validator==2.2.0
+
+# ─── Security ─────────────────────────────────────────────────────────────────
+python-dotenv==1.0.1
+cryptography==42.0.8
+bleach==6.1.0
+
+# ─── Observability ────────────────────────────────────────────────────────────
+sentry-sdk[flask]==2.12.0
+structlog==24.4.0
+
+# ─── Utils ────────────────────────────────────────────────────────────────────
+Pillow==10.4.0
+python-slugify==8.0.4
+babel==2.15.0
+pytz==2024.1
+requests==2.32.3
