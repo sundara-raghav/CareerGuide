@@ -39,7 +39,8 @@ SCHOLARSHIPS_SEED = [
 
 def seed():
     with app.app_context():
-        db.create_all()
+        # db.create_all()
+        pass
 
         # Seed colleges
         existing_slugs = {c.slug for c in db.session.query(College).all()}
